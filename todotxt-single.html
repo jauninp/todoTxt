@@ -1,0 +1,1715 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TodoTxt</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8f5;
+      --panel: #ffffff;
+      --panel-soft: #eef4ef;
+      --ink: #1d2524;
+      --muted: #64716d;
+      --line: #d8dfdc;
+      --accent: #197b75;
+      --accent-strong: #11615d;
+      --accent-soft: #d8eeeb;
+      --danger: #b9363f;
+      --warning: #b7791f;
+      --ok: #2f7d49;
+      --purple: #7554a8;
+      --blue: #2f67b1;
+      --shadow: 0 18px 50px rgba(30, 41, 38, 0.11);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 248, 245, 0.94)),
+        radial-gradient(circle at top left, rgba(25, 123, 117, 0.13), transparent 34rem),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1640px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .button {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 7px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      border-color: #b7c4bf;
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .button.primary:hover {
+      background: var(--accent-strong);
+    }
+
+    .button.icon {
+      width: 38px;
+      padding: 0;
+      font-size: 1.1rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .workspace, .sidebar {
+      min-width: 0;
+    }
+
+    .composer, .quick-views, .toolbar, .todo-list, .panel {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .composer {
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .add-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .text-input, .select, .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      min-height: 42px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    .text-input:focus, .select:focus, .textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .toolbar {
+      padding: 12px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) repeat(2, minmax(130px, auto));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .quick-views {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    .view-button {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 5px 12px;
+      white-space: nowrap;
+    }
+
+    .view-button:hover {
+      border-color: var(--accent);
+    }
+
+    .view-button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .view-count {
+      min-width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: var(--panel-soft);
+      color: var(--accent-strong);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .view-button.active .view-count {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: -4px 0 12px;
+    }
+
+    .filter-token {
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+
+    .filter-token button {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: inherit;
+      line-height: 1;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .todo-list {
+      overflow: hidden;
+    }
+
+    .list-head, .todo-row {
+      display: grid;
+      grid-template-columns: 38px 34px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .list-head {
+      padding: 13px 14px;
+      color: var(--muted);
+      background: #f4f7f5;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+
+    .todo-row {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+      transition: background 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .todo-row.dragging {
+      opacity: 0.5;
+    }
+
+    .todo-row.drop-target {
+      background: #eef8f6;
+      box-shadow: inset 0 2px 0 var(--accent);
+    }
+
+    .todo-row:last-child {
+      border-bottom: 0;
+    }
+
+    .todo-row.done {
+      background: #f0f2f1;
+      color: var(--muted);
+    }
+
+    .todo-row.done .todo-text {
+      text-decoration: line-through;
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--accent);
+    }
+
+    .drag-handle {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      cursor: grab;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .drag-handle:hover {
+      border-color: var(--line);
+      background: #fff;
+    }
+
+    .todo-main {
+      min-width: 0;
+    }
+
+    .todo-text {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 6px 4px;
+      background: transparent;
+      color: inherit;
+      font-size: 1.03rem;
+      font-weight: 650;
+      resize: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .todo-text:focus {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      outline: none;
+      text-decoration: none;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.78rem;
+      background: var(--panel-soft);
+      color: var(--muted);
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    button.chip {
+      cursor: pointer;
+    }
+
+    button.chip:hover {
+      border-color: currentColor;
+      background: #fff;
+    }
+
+    .chip.priority {
+      background: #f8e1e3;
+      color: var(--danger);
+    }
+
+    .chip.project {
+      background: #eadff8;
+      color: var(--purple);
+    }
+
+    .chip.context {
+      background: #dce9fb;
+      color: var(--blue);
+    }
+
+    .chip.due.overdue {
+      background: #f8e1e3;
+      color: var(--danger);
+    }
+
+    .chip.due.today {
+      background: #fff0cc;
+      color: var(--warning);
+    }
+
+    .chip.due.future {
+      background: #ddf0e4;
+      color: var(--ok);
+    }
+
+    .chip.metadata {
+      background: #f0e6d8;
+      color: #7c4f1f;
+    }
+
+    .chip.status-next {
+      background: #ddf0e4;
+      color: var(--ok);
+    }
+
+    .chip.status-waiting {
+      background: #dce9fb;
+      color: var(--blue);
+    }
+
+    .chip.status-blocked {
+      background: #f8e1e3;
+      color: var(--danger);
+    }
+
+    .chip.wait {
+      background: #fff0cc;
+      color: var(--warning);
+    }
+
+    .chip.start {
+      background: #e8ecea;
+      color: var(--muted);
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .button.mini {
+      min-height: 30px;
+      padding: 0 7px;
+      font-size: 0.82rem;
+    }
+
+    .empty {
+      padding: 44px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+      padding: 14px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 10px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.45rem;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .facet-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .facet {
+      max-width: 100%;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      min-height: 30px;
+      padding: 4px 10px;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .facet.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .modal {
+      border: 0;
+      border-radius: 8px;
+      padding: 0;
+      width: min(760px, calc(100vw - 28px));
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.26);
+    }
+
+    .modal::backdrop {
+      background: rgba(18, 25, 23, 0.52);
+    }
+
+    .modal-body {
+      padding: 18px;
+      background: var(--panel);
+    }
+
+    .modal-body h2 {
+      margin: 0 0 12px;
+    }
+
+    .help-content {
+      max-height: min(70vh, 680px);
+      overflow: auto;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .help-content h3 {
+      margin: 18px 0 8px;
+      font-size: 1rem;
+    }
+
+    .help-content p {
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    .help-content code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: var(--panel-soft);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.9em;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) 1fr;
+      gap: 8px 12px;
+      align-items: start;
+      margin: 10px 0 16px;
+    }
+
+    .help-grid div {
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .snapshot-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .snapshot-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+    }
+
+    .snapshot-row span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .textarea {
+      min-height: 320px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 12px 14px;
+      background: #1d2524;
+      color: white;
+      border-radius: 7px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 980px) {
+      .topbar, .layout, .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 16px;
+      }
+
+      .add-form, .list-head, .todo-row {
+        grid-template-columns: 1fr;
+      }
+
+      .list-head {
+        display: none;
+      }
+
+      .row-actions {
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>TodoTxtJs</h1>
+      </div>
+      <div class="actions" aria-label="Actions">
+        <button class="button" id="helpButton" type="button">Aide</button>
+        <button class="button" id="importButton" type="button">Importer</button>
+        <button class="button" id="exportButton" type="button">Exporter</button>
+        <button class="button" id="backupButton" type="button">Backup</button>
+        <button class="button" id="historyButton" type="button">Historique</button>
+        <button class="button" id="downloadButton" type="button">Télécharger</button>
+        <button class="button" id="copyButton" type="button">Copier</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="workspace">
+        <section class="composer" aria-label="Ajouter une tâche">
+          <form class="add-form" id="addForm">
+            <label class="sr-only" for="newTodo">Nouvelle tâche</label>
+            <input class="text-input" id="newTodo" autocomplete="off" placeholder="(A) Appeler @bureau +Projet due:2026-05-12">
+            <button class="button primary" type="submit">Ajouter</button>
+          </form>
+        </section>
+
+        <section class="quick-views" id="quickViews" aria-label="Vues rapides"></section>
+        <section class="active-filters" id="activeFilters" aria-label="Filtres actifs"></section>
+
+        <section class="toolbar" aria-label="Filtres et tri">
+          <label class="sr-only" for="searchInput">Recherche</label>
+          <input class="text-input" id="searchInput" placeholder="Filtrer par texte, +projet, @contexte, is:today, status:next">
+          <label class="toggle"><input type="checkbox" id="showDone"> Terminées</label>
+          <label>
+            <span class="sr-only">Tri</span>
+            <select class="select" id="sortSelect">
+              <option value="file">Ordre du fichier</option>
+              <option value="due">Échéance</option>
+              <option value="priority">Priorité</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="todo-list" aria-live="polite">
+          <div class="list-head">
+            <span>État</span>
+            <span></span>
+            <span>Tâche</span>
+            <span>Actions</span>
+          </div>
+          <div id="todoList"></div>
+        </section>
+      </div>
+
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Vue</h2>
+          <div class="stats">
+            <div class="stat"><strong id="openCount">0</strong><span>ouvertes</span></div>
+            <div class="stat"><strong id="doneCount">0</strong><span>terminées</span></div>
+            <div class="stat"><strong id="dueCount">0</strong><span>à venir</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>Priorités</h2>
+          <div class="facet-list" id="priorityFacets"></div>
+        </section>
+        <section class="panel">
+          <h2>Projets</h2>
+          <div class="facet-list" id="projectFacets"></div>
+        </section>
+        <section class="panel">
+          <h2>Contextes</h2>
+          <div class="facet-list" id="contextFacets"></div>
+        </section>
+        <section class="panel">
+          <h2>Statuts</h2>
+          <div class="facet-list" id="statusFacets"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <dialog class="modal" id="textDialog">
+    <form method="dialog" class="modal-body">
+      <h2 id="dialogTitle">todo.txt</h2>
+      <textarea class="textarea" id="bulkText" spellcheck="false"></textarea>
+      <div class="modal-actions">
+        <button class="button" value="cancel" type="submit">Fermer</button>
+        <button class="button primary" id="dialogApply" value="apply" type="submit">Appliquer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="helpDialog">
+    <form method="dialog" class="modal-body">
+      <h2>Documentation</h2>
+      <div class="help-content">
+        <h3>Format de base</h3>
+        <p>Une tâche est une ligne de texte. Le format reste compatible todo.txt : priorité, date, texte, projets, contextes et metadata.</p>
+        <div class="help-grid">
+          <div><code>(A)</code></div><div>Priorité. <code>(A)</code> est plus important que <code>(B)</code>.</div>
+          <div><code>2026-05-08</code></div><div>Date écrite dans la ligne todo.txt si tu veux la conserver.</div>
+          <div><code>+Projet</code></div><div>Projet cliquable et filtrable.</div>
+          <div><code>@bureau</code></div><div>Contexte cliquable et filtrable.</div>
+          <div><code>KEY:VALEUR</code></div><div>Metadata libre. L'app la rend visuelle sous forme de pastille.</div>
+        </div>
+
+        <h3>Statuts recommandés</h3>
+        <div class="help-grid">
+          <div><code>status:next</code></div><div>Prochaine action claire, faisable maintenant. C'est ta liste d'exécution.</div>
+          <div><code>status:waiting</code></div><div>En attente d'une personne, d'une réponse ou d'un événement. À relancer avec <code>wait:YYYY-MM-DD</code>.</div>
+          <div><code>status:blocked</code></div><div>Impossible d'avancer tant qu'un blocage n'est pas levé.</div>
+        </div>
+
+        <h3>Organisation quotidienne</h3>
+        <p>Le panneau <code>Aujourd'hui</code> remonte les relances dues, les tâches en retard, les tâches planifiées aujourd'hui et les prochaines actions.</p>
+        <div class="help-grid">
+          <div><code>today:YYYY-MM-DD</code></div><div>Planifie une tâche dans ton plan du jour sans changer son échéance.</div>
+          <div><code>note:...</code></div><div>Ajoute du contexte à une tâche. Les espaces sont encodés pour rester compatibles avec une ligne todo.txt.</div>
+        </div>
+
+        <h3>Dates de travail</h3>
+        <div class="help-grid">
+          <div><code>due:YYYY-MM-DD</code></div><div>Échéance. Utilisée par les vues Aujourd'hui, En retard et Cette semaine.</div>
+          <div><code>start:YYYY-MM-DD</code></div><div>Date avant laquelle la tâche ne devrait pas te polluer l'esprit.</div>
+          <div><code>wait:YYYY-MM-DD</code></div><div>Date de relance pour une tâche en attente.</div>
+        </div>
+
+        <h3>Filtres utiles</h3>
+        <div class="help-grid">
+          <div><code>is:today</code></div><div>Échéance, début ou relance aujourd'hui.</div>
+          <div><code>is:followup</code></div><div>Relances dues ou dépassées.</div>
+          <div><code>is:overdue</code></div><div>Tâches ouvertes dont l'échéance est dépassée.</div>
+          <div><code>is:week</code></div><div>Tâches ouvertes avec échéance dans les 7 jours.</div>
+          <div><code>is:available</code></div><div>Tâches ouvertes dont <code>start:</code> et <code>wait:</code> ne sont pas dans le futur.</div>
+          <div><code>has:due</code></div><div>Tâches qui ont une échéance.</div>
+          <div><code>no:project</code></div><div>Tâches sans projet.</div>
+        </div>
+
+        <h3>Sauvegarde</h3>
+        <p>L'app sauvegarde dans le stockage local du navigateur et conserve un historique interne des versions récentes. Pour une vraie sécurité, utilise régulièrement <code>Backup</code> : cela télécharge un fichier daté que tu peux ranger sur ton disque ou dans ton espace réseau.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="button primary" value="cancel" type="submit">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="historyDialog">
+    <form method="dialog" class="modal-body">
+      <h2>Historique local</h2>
+      <p class="help-content">Ces versions sont stockées dans ce navigateur. Elles aident contre les erreurs récentes, mais ne remplacent pas un fichier backup téléchargé.</p>
+      <div class="snapshot-list" id="snapshotList"></div>
+      <div class="modal-actions">
+        <button class="button" value="cancel" type="submit">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "todotxtjs.single.v1";
+      const SETTINGS_KEY = "todotxtjs.single.settings.v1";
+      const SNAPSHOTS_KEY = "todotxtjs.single.snapshots.v1";
+      const MAX_SNAPSHOTS = 30;
+      const DATE_RE = /^(?:19|20)\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/;
+      const QUICK_VIEWS = [
+        { label: "Aujourd'hui", filter: "is:today" },
+        { label: "Relances", filter: "is:followup" },
+        { label: "En retard", filter: "is:overdue" },
+        { label: "Cette semaine", filter: "is:week" },
+        { label: "Next", filter: "status:next" },
+        { label: "Waiting", filter: "status:waiting" },
+        { label: "Blocked", filter: "status:blocked" },
+        { label: "Sans projet", filter: "no:project" }
+      ];
+      const SAMPLE = [
+        "(A) 2026-05-08 Reprendre +TodoTxtJs @dev due:2026-05-12 status:next",
+        "Préparer l'import du fichier todo.txt +TodoTxtJs @maison status:waiting wait:2026-05-10",
+        "(B) Vérifier les points bloquants +TodoTxtJs @dev status:blocked",
+        "x 2026-05-08 2026-05-01 Ancienne tâche terminée +Archive"
+      ].join("\n");
+
+      const state = {
+        todos: [],
+        filter: "",
+        filters: [],
+        draggedId: "",
+        showDone: false,
+        sort: "due",
+        dialogMode: "export"
+      };
+
+      const el = {
+        addForm: document.querySelector("#addForm"),
+        newTodo: document.querySelector("#newTodo"),
+        searchInput: document.querySelector("#searchInput"),
+        showDone: document.querySelector("#showDone"),
+        sortSelect: document.querySelector("#sortSelect"),
+        quickViews: document.querySelector("#quickViews"),
+        activeFilters: document.querySelector("#activeFilters"),
+        todoList: document.querySelector("#todoList"),
+        openCount: document.querySelector("#openCount"),
+        doneCount: document.querySelector("#doneCount"),
+        dueCount: document.querySelector("#dueCount"),
+        priorityFacets: document.querySelector("#priorityFacets"),
+        projectFacets: document.querySelector("#projectFacets"),
+        contextFacets: document.querySelector("#contextFacets"),
+        statusFacets: document.querySelector("#statusFacets"),
+        helpButton: document.querySelector("#helpButton"),
+        importButton: document.querySelector("#importButton"),
+        exportButton: document.querySelector("#exportButton"),
+        backupButton: document.querySelector("#backupButton"),
+        historyButton: document.querySelector("#historyButton"),
+        downloadButton: document.querySelector("#downloadButton"),
+        copyButton: document.querySelector("#copyButton"),
+        textDialog: document.querySelector("#textDialog"),
+        helpDialog: document.querySelector("#helpDialog"),
+        historyDialog: document.querySelector("#historyDialog"),
+        snapshotList: document.querySelector("#snapshotList"),
+        dialogTitle: document.querySelector("#dialogTitle"),
+        bulkText: document.querySelector("#bulkText"),
+        dialogApply: document.querySelector("#dialogApply"),
+        toast: document.querySelector("#toast")
+      };
+
+      function todayISO() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function parseTodo(line, index) {
+        const tokens = line.trim().split(/\s+/);
+        let cursor = 0;
+        let completed = false;
+        let completedDate = "";
+        let priority = "";
+        let createdDate = "";
+
+        if (tokens[cursor] === "x") {
+          completed = true;
+          cursor += 1;
+          if (DATE_RE.test(tokens[cursor] || "")) {
+            completedDate = tokens[cursor];
+            cursor += 1;
+          }
+        }
+
+        const priorityMatch = /^\(([A-Z])\)$/.exec(tokens[cursor] || "");
+        if (priorityMatch) {
+          priority = priorityMatch[1];
+          cursor += 1;
+        }
+
+        if (DATE_RE.test(tokens[cursor] || "")) {
+          createdDate = tokens[cursor];
+          cursor += 1;
+        }
+
+        const content = tokens.slice(cursor).join(" ");
+        const projects = collect(content, /(?:^|\s)\+([^\s+@]+)/g);
+        const contexts = collect(content, /(?:^|\s)@([^\s+@]+)/g);
+        const metadata = collectPairs(content, /(?:^|\s)([A-Za-z][A-Za-z0-9_-]*):([^\s]+)/g);
+        const due = metadata.find((item) => item.name.toLowerCase() === "due");
+        const start = metadata.find((item) => item.name.toLowerCase() === "start");
+        const wait = metadata.find((item) => item.name.toLowerCase() === "wait");
+        const today = metadata.find((item) => item.name.toLowerCase() === "today");
+        const status = metadata.find((item) => item.name.toLowerCase() === "status");
+
+        return {
+          id: globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${index}-${Math.random()}`,
+          index,
+          line,
+          completed,
+          completedDate,
+          priority,
+          createdDate,
+          content,
+          projects,
+          contexts,
+          metadata,
+          dueDate: due && DATE_RE.test(due.value) ? due.value : "",
+          startDate: start && DATE_RE.test(start.value) ? start.value : "",
+          waitDate: wait && DATE_RE.test(wait.value) ? wait.value : "",
+          todayDate: today && DATE_RE.test(today.value) ? today.value : "",
+          status: status ? status.value.toLowerCase() : ""
+        };
+      }
+
+      function collect(text, regex) {
+        return Array.from(text.matchAll(regex), (match) => match[1]);
+      }
+
+      function collectPairs(text, regex) {
+        return Array.from(text.matchAll(regex), (match) => ({ name: match[1], value: match[2] }));
+      }
+
+      function renderTodo(todo) {
+        const parts = [];
+        if (todo.completed) {
+          parts.push("x");
+          if (todo.completedDate) parts.push(todo.completedDate);
+        }
+        if (todo.priority) parts.push(`(${todo.priority})`);
+        if (todo.createdDate) parts.push(todo.createdDate);
+        if (todo.content) parts.push(todo.content);
+        return parts.join(" ").trim();
+      }
+
+      function load() {
+        const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+        state.showDone = Boolean(settings.showDone);
+        state.sort = settings.sort || "due";
+        state.todos = (localStorage.getItem(STORAGE_KEY) || SAMPLE)
+          .split(/\r?\n/)
+          .filter((line) => line.trim().length > 0)
+          .map(parseTodo);
+      }
+
+      function save() {
+        const text = exportText();
+        localStorage.setItem(STORAGE_KEY, text);
+        saveSnapshot(text);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+          showDone: state.showDone,
+          sort: state.sort
+        }));
+      }
+
+      function exportText() {
+        return [...state.todos]
+          .sort((a, b) => a.index - b.index)
+          .map((todo) => todo.line)
+          .join("\n");
+      }
+
+      function loadSnapshots() {
+        try {
+          const snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || "[]");
+          return Array.isArray(snapshots) ? snapshots : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveSnapshot(text) {
+        if (!text.trim()) return;
+        const snapshots = loadSnapshots();
+        if (snapshots[0]?.text === text) return;
+        snapshots.unshift({
+          createdAt: new Date().toISOString(),
+          count: text.split(/\r?\n/).filter((line) => line.trim()).length,
+          text
+        });
+        localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots.slice(0, MAX_SNAPSHOTS)));
+      }
+
+      function syncControls() {
+        el.searchInput.value = state.filter;
+        el.showDone.checked = state.showDone;
+        el.sortSelect.value = state.sort;
+      }
+
+      function visibleTodos() {
+        const filter = [state.filter, ...state.filters].filter(Boolean).join(" ").toLowerCase();
+        return [...state.todos]
+          .filter((todo) => state.showDone || !todo.completed)
+          .filter((todo) => matchesFilter(todo, filter))
+          .sort(sorter);
+      }
+
+      function matchesFilter(todo, filter) {
+        if (!filter) return true;
+        return filter.split(/\s+/).every((part) => {
+          if (!part) return true;
+          if (/^\([a-z]\)$/.test(part)) return todo.priority.toLowerCase() === part.slice(1, 2);
+          if (part.startsWith("is:")) return matchesSmartFilter(todo, part.slice(3));
+          if (part.startsWith("has:")) return hasField(todo, part.slice(4));
+          if (part.startsWith("no:")) return !hasField(todo, part.slice(3));
+          if (part === "due:today") return todo.dueDate === todayISO();
+          if (part === "due:soon") return todo.dueDate && daysUntil(todo.dueDate) <= 7;
+          if (part.startsWith("status:")) return todo.status === part.slice(7);
+          return todo.line.toLowerCase().includes(part);
+        });
+      }
+
+      function matchesSmartFilter(todo, name) {
+        const dueDays = todo.dueDate ? daysUntil(todo.dueDate) : null;
+        const waitDays = todo.waitDate ? daysUntil(todo.waitDate) : null;
+        const startDays = todo.startDate ? daysUntil(todo.startDate) : null;
+        switch (name) {
+          case "open":
+            return !todo.completed;
+          case "done":
+            return todo.completed;
+          case "today":
+            return todo.todayDate === todayISO() || todo.dueDate === todayISO() || todo.waitDate === todayISO() || todo.startDate === todayISO();
+          case "followup":
+            return !todo.completed && todo.waitDate && waitDays <= 0;
+          case "overdue":
+            return !todo.completed && dueDays !== null && dueDays < 0;
+          case "week":
+            return !todo.completed && dueDays !== null && dueDays >= 0 && dueDays <= 7;
+          case "soon":
+            return !todo.completed && dueDays !== null && dueDays >= 0 && dueDays <= 3;
+          case "waiting":
+            return todo.status === "waiting" || (waitDays !== null && waitDays > 0);
+          case "blocked":
+            return todo.status === "blocked";
+          case "next":
+            return todo.status === "next";
+          case "available":
+            return !todo.completed && (startDays === null || startDays <= 0) && (waitDays === null || waitDays <= 0);
+          default:
+            return false;
+        }
+      }
+
+      function hasField(todo, field) {
+        if (field === "project") return todo.projects.length > 0;
+        if (field === "context") return todo.contexts.length > 0;
+        if (field === "priority") return Boolean(todo.priority);
+        if (field === "due") return Boolean(todo.dueDate);
+        if (field === "start") return Boolean(todo.startDate);
+        if (field === "wait") return Boolean(todo.waitDate);
+        if (field === "today") return Boolean(todo.todayDate);
+        if (field === "status") return Boolean(todo.status);
+        return todo.metadata.some((item) => item.name.toLowerCase() === field);
+      }
+
+      function sorter(a, b) {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        if (state.sort === "priority") return comparePriority(a, b) || compareDue(a, b) || a.index - b.index;
+        if (state.sort === "due") return compareDue(a, b) || comparePriority(a, b) || a.index - b.index;
+        return a.index - b.index;
+      }
+
+      function comparePriority(a, b) {
+        const left = a.priority ? a.priority.charCodeAt(0) : 999;
+        const right = b.priority ? b.priority.charCodeAt(0) : 999;
+        return left - right;
+      }
+
+      function compareDue(a, b) {
+        return compareTextDate(a.dueDate, b.dueDate);
+      }
+
+      function compareTextDate(a, b) {
+        if (!a && !b) return 0;
+        if (!a) return 1;
+        if (!b) return -1;
+        return a.localeCompare(b);
+      }
+
+      function daysUntil(dateText) {
+        const day = new Date(`${dateText}T00:00:00`);
+        const today = new Date(`${todayISO()}T00:00:00`);
+        return Math.ceil((day - today) / 86400000);
+      }
+
+      function render() {
+        syncControls();
+        renderQuickViews();
+        renderActiveFilters();
+        renderStats();
+        renderFacets();
+        renderList();
+      }
+
+      function isFilterActive(value) {
+        return state.filters.includes(value);
+      }
+
+      function toggleFilter(value) {
+        if (!value) return;
+        if (isFilterActive(value)) {
+          state.filters = state.filters.filter((filter) => filter !== value);
+        } else {
+          state.filters = [...state.filters, value];
+        }
+        render();
+      }
+
+      function renderActiveFilters() {
+        el.activeFilters.replaceChildren();
+        for (const value of state.filters) {
+          const token = document.createElement("span");
+          token.className = "filter-token";
+          token.textContent = value;
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.textContent = "×";
+          remove.setAttribute("aria-label", `Retirer ${value}`);
+          remove.addEventListener("click", () => toggleFilter(value));
+
+          token.append(remove);
+          el.activeFilters.append(token);
+        }
+      }
+
+      function renderQuickViews() {
+        el.quickViews.replaceChildren();
+        for (const view of QUICK_VIEWS) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `view-button${isFilterActive(view.filter) ? " active" : ""}`;
+          const label = document.createElement("span");
+          label.textContent = view.label;
+          const count = document.createElement("span");
+          count.className = "view-count";
+          count.textContent = countForFilter(view.filter);
+          button.append(label, count);
+          button.addEventListener("click", () => toggleFilter(view.filter));
+          el.quickViews.append(button);
+        }
+      }
+
+      function countForFilter(filter) {
+        return state.todos.filter((todo) => !todo.completed && matchesFilter(todo, filter.toLowerCase())).length;
+      }
+
+      function renderStats() {
+        const open = state.todos.filter((todo) => !todo.completed).length;
+        const done = state.todos.length - open;
+        const due = state.todos.filter((todo) => !todo.completed && todo.dueDate && daysUntil(todo.dueDate) <= 7).length;
+        el.openCount.textContent = open;
+        el.doneCount.textContent = done;
+        el.dueCount.textContent = due;
+      }
+
+      function renderFacets() {
+        renderFacetGroup(el.priorityFacets, unique(state.todos.map((todo) => todo.priority).filter(Boolean)).map((name) => `(${name})`));
+        renderFacetGroup(el.projectFacets, unique(state.todos.flatMap((todo) => todo.projects)).map((name) => `+${name}`), "+");
+        renderFacetGroup(el.contextFacets, unique(state.todos.flatMap((todo) => todo.contexts)).map((name) => `@${name}`), "@");
+        renderFacetGroup(el.statusFacets, unique(state.todos.map((todo) => todo.status).filter(Boolean)).map((name) => `status:${name}`));
+      }
+
+      function unique(values) {
+        return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+      }
+
+      function renderFacetGroup(container, values) {
+        container.replaceChildren();
+        if (values.length === 0) {
+          const empty = document.createElement("span");
+          empty.className = "chip";
+          empty.textContent = "Aucun";
+          container.append(empty);
+          return;
+        }
+        for (const value of values) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `facet${isFilterActive(value) ? " active" : ""}`;
+          button.textContent = value;
+          button.addEventListener("click", () => toggleFilter(value));
+          container.append(button);
+        }
+      }
+
+      function renderList() {
+        const todos = visibleTodos();
+        el.todoList.replaceChildren();
+        if (todos.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "Aucune tâche ne correspond aux filtres actuels.";
+          el.todoList.append(empty);
+          return;
+        }
+
+        for (const todo of todos) {
+          const row = document.createElement("article");
+          row.className = `todo-row${todo.completed ? " done" : ""}`;
+          row.dataset.id = todo.id;
+          row.addEventListener("dragstart", (event) => {
+            state.draggedId = todo.id;
+            row.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", todo.id);
+          });
+          row.addEventListener("dragend", () => {
+            state.draggedId = "";
+            row.classList.remove("dragging");
+            document.querySelectorAll(".drop-target").forEach((node) => node.classList.remove("drop-target"));
+          });
+          row.addEventListener("dragover", (event) => {
+            if (!state.draggedId || state.draggedId === todo.id) return;
+            event.preventDefault();
+            row.classList.add("drop-target");
+          });
+          row.addEventListener("dragleave", () => row.classList.remove("drop-target"));
+          row.addEventListener("drop", (event) => {
+            event.preventDefault();
+            row.classList.remove("drop-target");
+            reorderTodos(state.draggedId || event.dataTransfer.getData("text/plain"), todo.id);
+          });
+
+          const check = document.createElement("input");
+          check.className = "check";
+          check.type = "checkbox";
+          check.checked = todo.completed;
+          check.setAttribute("aria-label", "Marquer comme terminée");
+          check.addEventListener("change", () => toggleTodo(todo.id, check.checked));
+
+          const handle = document.createElement("button");
+          handle.className = "drag-handle";
+          handle.type = "button";
+          handle.title = "Déplacer";
+          handle.setAttribute("aria-label", "Déplacer");
+          handle.textContent = "⋮⋮";
+          handle.draggable = true;
+
+          const main = document.createElement("div");
+          main.className = "todo-main";
+          const text = document.createElement("input");
+          text.type = "text";
+          text.className = "todo-text";
+          text.value = todo.line;
+          text.addEventListener("change", () => updateTodo(todo.id, text.value));
+          text.addEventListener("blur", () => updateTodo(todo.id, text.value));
+          text.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") text.blur();
+          });
+          main.append(text, metadataNode(todo));
+
+          const actions = document.createElement("div");
+          actions.className = "row-actions";
+          const next = actionButton("▶", "Marquer comme prochaine action", () => setTodoMetadata(todo.id, "status", "next"));
+          next.classList.add("mini");
+          const remove = actionButton("×", "Supprimer", () => removeTodo(todo.id));
+          actions.append(next, remove);
+
+          row.append(check, handle, main, actions);
+          el.todoList.append(row);
+        }
+      }
+
+      function metadataNode(todo) {
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        if (todo.priority) meta.append(chip(`(${todo.priority})`, "priority", `(${todo.priority})`));
+        for (const item of todo.metadata) {
+          const name = item.name.toLowerCase();
+          const value = metadataDisplay(item.name, item.value);
+          const kind = metadataClass(name, item.value);
+          meta.append(chip(value, kind, `${item.name}:${item.value}`));
+        }
+        for (const project of todo.projects) meta.append(chip(`+${project}`, "project", `+${project}`));
+        for (const context of todo.contexts) meta.append(chip(`@${context}`, "context", `@${context}`));
+        return meta;
+      }
+
+      function dueClass(dateText) {
+        const days = daysUntil(dateText);
+        if (days < 0) return "overdue";
+        if (days === 0) return "today";
+        return "future";
+      }
+
+      function metadataClass(name, value) {
+        if (name === "due" && DATE_RE.test(value)) return `due ${dueClass(value)}`;
+        if (name === "wait" && DATE_RE.test(value)) return "wait";
+        if (name === "start" && DATE_RE.test(value)) return "start";
+        if (name === "today" && DATE_RE.test(value)) return "due today";
+        if (name === "note") return "metadata";
+        if (name === "status") {
+          const normalized = value.toLowerCase();
+          if (["next", "waiting", "blocked"].includes(normalized)) return `status-${normalized}`;
+        }
+        return "metadata";
+      }
+
+      function metadataDisplay(name, value) {
+        if (name.toLowerCase() === "note") return `note:${decodeNote(value)}`;
+        return `${name}:${value}`;
+      }
+
+      function chip(text, kind, filterValue) {
+        const node = document.createElement(filterValue ? "button" : "span");
+        node.className = `chip ${kind}`.trim();
+        node.textContent = text;
+        if (filterValue) {
+          node.type = "button";
+          node.title = "Filtrer";
+          node.addEventListener("click", () => toggleFilter(filterValue));
+        }
+        return node;
+      }
+
+      function actionButton(text, label, handler) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "button icon";
+        button.textContent = text;
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.addEventListener("click", handler);
+        return button;
+      }
+
+      function addTodo(source) {
+        const line = source.trim();
+        if (!line) return;
+        state.todos.push(parseTodo(line, nextIndex()));
+        save();
+        render();
+      }
+
+      function nextIndex() {
+        return state.todos.reduce((max, todo) => Math.max(max, todo.index), -1) + 1;
+      }
+
+      function updateTodo(id, line) {
+        const index = state.todos.findIndex((todo) => todo.id === id);
+        if (index < 0) return;
+        const trimmed = line.trim();
+        if (!trimmed) {
+          removeTodo(id);
+          return;
+        }
+        state.todos[index] = { ...parseTodo(trimmed, state.todos[index].index), id };
+        save();
+        render();
+      }
+
+      function setTodoMetadata(id, key, value) {
+        const index = state.todos.findIndex((todo) => todo.id === id);
+        if (index < 0) return;
+        const todo = state.todos[index];
+        todo.content = upsertMetadata(todo.content, key, value);
+        todo.line = renderTodo(todo);
+        state.todos[index] = { ...parseTodo(todo.line, todo.index), id };
+        save();
+        render();
+      }
+
+      function upsertMetadata(content, key, value) {
+        const pattern = new RegExp(`(^|\\s)${escapeRegExp(key)}:[^\\s]+`, "i");
+        const token = `${key}:${value}`;
+        if (pattern.test(content)) {
+          return content.replace(pattern, (match, prefix) => `${prefix}${token}`).trim();
+        }
+        return `${content} ${token}`.trim();
+      }
+
+      function escapeRegExp(value) {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      function editNote(id) {
+        const todo = state.todos.find((item) => item.id === id);
+        if (!todo) return;
+        const existing = todo.metadata.find((item) => item.name.toLowerCase() === "note");
+        const next = prompt("Contexte / note pour cette tâche", existing ? decodeNote(existing.value) : "");
+        if (next === null) return;
+        if (!next.trim()) {
+          removeTodoMetadata(id, "note");
+          return;
+        }
+        setTodoMetadata(id, "note", encodeNote(next.trim()));
+      }
+
+      function removeTodoMetadata(id, key) {
+        const index = state.todos.findIndex((todo) => todo.id === id);
+        if (index < 0) return;
+        const todo = state.todos[index];
+        const pattern = new RegExp(`(^|\\s)${escapeRegExp(key)}:[^\\s]+`, "ig");
+        todo.content = todo.content.replace(pattern, " ").replace(/\s+/g, " ").trim();
+        todo.line = renderTodo(todo);
+        state.todos[index] = { ...parseTodo(todo.line, todo.index), id };
+        save();
+        render();
+      }
+
+      function encodeNote(value) {
+        return encodeURIComponent(value);
+      }
+
+      function decodeNote(value) {
+        try {
+          return decodeURIComponent(value);
+        } catch {
+          return value;
+        }
+      }
+
+      function toggleTodo(id, completed) {
+        const todo = state.todos.find((item) => item.id === id);
+        if (!todo) return;
+        todo.completed = completed;
+        todo.completedDate = completed ? todayISO() : "";
+        todo.line = renderTodo(todo);
+        Object.assign(todo, parseTodo(todo.line, todo.index), { id: todo.id });
+        save();
+        render();
+      }
+
+      function removeTodo(id) {
+        state.todos = state.todos.filter((todo) => todo.id !== id);
+        save();
+        render();
+      }
+
+      function reorderTodos(draggedId, targetId) {
+        if (!draggedId || !targetId || draggedId === targetId) return;
+        const ordered = [...state.todos].sort((a, b) => a.index - b.index);
+        const from = ordered.findIndex((todo) => todo.id === draggedId);
+        const to = ordered.findIndex((todo) => todo.id === targetId);
+        if (from < 0 || to < 0) return;
+        const [moved] = ordered.splice(from, 1);
+        ordered.splice(to, 0, moved);
+        ordered.forEach((todo, index) => {
+          todo.index = index;
+        });
+        state.todos = ordered;
+        state.sort = "file";
+        save();
+        render();
+        notify("Ordre du fichier mis à jour.");
+      }
+
+      function openDialog(mode) {
+        state.dialogMode = mode;
+        el.dialogTitle.textContent = mode === "import" ? "Importer todo.txt" : "Exporter todo.txt";
+        el.dialogApply.textContent = mode === "import" ? "Importer" : "Copier";
+        el.bulkText.value = mode === "import" ? "" : exportText();
+        el.textDialog.showModal();
+        requestAnimationFrame(() => el.bulkText.focus());
+      }
+
+      function importText(text) {
+        state.todos = text.split(/\r?\n/)
+          .filter((line) => line.trim().length > 0)
+          .map(parseTodo);
+        save();
+        render();
+        notify("Import terminé.");
+      }
+
+      async function copyText(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          notify("Texte copié.");
+        } catch {
+          openDialog("export");
+          el.bulkText.select();
+          notify("Copie automatique indisponible.");
+        }
+      }
+
+      function downloadText() {
+        downloadFile("todo.txt", exportText());
+      }
+
+      function downloadBackup() {
+        downloadFile(`todo-backup-${timestampForFile()}.txt`, exportText());
+        notify("Backup téléchargé.");
+      }
+
+      function downloadFile(filename, text) {
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function timestampForFile() {
+        const date = new Date();
+        const pad = (value) => String(value).padStart(2, "0");
+        return [
+          date.getFullYear(),
+          pad(date.getMonth() + 1),
+          pad(date.getDate())
+        ].join("-") + "-" + [pad(date.getHours()), pad(date.getMinutes()), pad(date.getSeconds())].join("");
+      }
+
+      function openHistory() {
+        renderHistory();
+        el.historyDialog.showModal();
+      }
+
+      function renderHistory() {
+        const snapshots = loadSnapshots();
+        el.snapshotList.replaceChildren();
+        if (snapshots.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "Aucune version locale enregistrée.";
+          el.snapshotList.append(empty);
+          return;
+        }
+        for (const snapshot of snapshots) {
+          const row = document.createElement("div");
+          row.className = "snapshot-row";
+
+          const label = document.createElement("span");
+          label.textContent = `${formatSnapshotDate(snapshot.createdAt)} · ${snapshot.count} tâche(s)`;
+
+          const restore = document.createElement("button");
+          restore.type = "button";
+          restore.className = "button";
+          restore.textContent = "Restaurer";
+          restore.addEventListener("click", () => {
+            importText(snapshot.text);
+            el.historyDialog.close();
+            notify("Version restaurée.");
+          });
+
+          const download = document.createElement("button");
+          download.type = "button";
+          download.className = "button";
+          download.textContent = "Backup";
+          download.addEventListener("click", () => downloadFile(`todo-backup-${timestampForFile()}.txt`, snapshot.text));
+
+          row.append(label, restore, download);
+          el.snapshotList.append(row);
+        }
+      }
+
+      function formatSnapshotDate(value) {
+        const date = new Date(value);
+        return date.toLocaleString("fr-FR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+
+      function notify(message) {
+        el.toast.textContent = message;
+        el.toast.classList.add("visible");
+        clearTimeout(notify.timer);
+        notify.timer = setTimeout(() => el.toast.classList.remove("visible"), 2200);
+      }
+
+      el.addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        addTodo(el.newTodo.value);
+        el.newTodo.value = "";
+        el.newTodo.focus();
+      });
+
+      el.searchInput.addEventListener("input", () => {
+        state.filter = el.searchInput.value;
+        render();
+      });
+
+      el.showDone.addEventListener("change", () => {
+        state.showDone = el.showDone.checked;
+        save();
+        render();
+      });
+
+      el.sortSelect.addEventListener("change", () => {
+        state.sort = el.sortSelect.value;
+        save();
+        render();
+      });
+
+      el.helpButton.addEventListener("click", () => el.helpDialog.showModal());
+      el.importButton.addEventListener("click", () => openDialog("import"));
+      el.exportButton.addEventListener("click", () => openDialog("export"));
+      el.backupButton.addEventListener("click", downloadBackup);
+      el.historyButton.addEventListener("click", openHistory);
+      el.downloadButton.addEventListener("click", downloadText);
+      el.copyButton.addEventListener("click", () => copyText(exportText()));
+
+      el.textDialog.addEventListener("close", () => {
+        if (el.textDialog.returnValue !== "apply") return;
+        if (state.dialogMode === "import") importText(el.bulkText.value);
+        else copyText(el.bulkText.value);
+      });
+
+      window.addEventListener("keydown", (event) => {
+        const target = event.target;
+        const isTyping = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+        if (event.key === "/" && !isTyping) {
+          event.preventDefault();
+          el.searchInput.focus();
+        }
+        if (event.key.toLowerCase() === "n" && !isTyping) {
+          event.preventDefault();
+          el.newTodo.focus();
+        }
+        if (event.key === "Escape") {
+          state.filter = "";
+          state.filters = [];
+          render();
+          if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+        }
+      });
+
+      load();
+      render();
+    })();
+  </script>
+</body>
+</html>
