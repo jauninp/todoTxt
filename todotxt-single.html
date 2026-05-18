@@ -2120,7 +2120,13 @@ button {
           check.type = "checkbox";
           check.checked = todo.completed;
           check.setAttribute("aria-label", "Marquer comme terminée");
-          check.addEventListener("change", () => toggleTodo(todo.id, check.checked));
+          check.addEventListener("click", (event) => {
+ 		 event.stopPropagation();
+	  });
+
+	check.addEventListener("change", () => {
+	  toggleTodo(todo.id, check.checked);
+	});
 
           const handle = document.createElement("button");
           handle.className = "drag-handle";
@@ -2254,7 +2260,13 @@ button {
         check.type = "checkbox";
         check.checked = todo.completed;
         check.setAttribute("aria-label", "Marquer comme terminée");
-        check.addEventListener("change", () => toggleTodo(todo.id, check.checked));
+        check.addEventListener("click", (event) => {
+	  event.stopPropagation();
+	});
+
+	check.addEventListener("change", () => {
+	  toggleTodo(todo.id, check.checked);
+	});
 
         const main = document.createElement("div");
         main.className = "todo-main";
