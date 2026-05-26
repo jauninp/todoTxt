@@ -1,0 +1,4315 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Worklog</title>    <style>
+/* src/styles/base.css */
+:root {
+  color-scheme: light;
+  --bg: #f8f8f6;
+  --paper: #ffffff;
+  --ink: #222322;
+  --muted: #6b706b;
+  --quiet: #8d928d;
+  --line: #ddded9;
+  --line-soft: #ecece8;
+  --panel: #f2f3ef;
+  --panel-2: #fafaf8;
+  --green: #2f6f60;
+  --green-soft: #e6f1ee;
+  --blue: #3b5f90;
+  --blue-soft: #e8eef8;
+  --amber: #7a5d17;
+  --amber-soft: #fff4d7;
+  --red: #9a423d;
+  --red-soft: #fbe9e7;
+  --violet: #62528e;
+  --violet-soft: #eeeaf7;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 1240px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #9dbcb4;
+  outline-offset: 1px;
+}
+
+.button {
+  height: 35px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-color: var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  padding: 0 12px;
+  font-weight: 650;
+}
+
+.button.primary {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
+.button.active {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.button.danger {
+  border-color: #e2c2bf;
+  color: var(--red);
+}
+
+.button.danger:hover {
+  background: var(--red-soft);
+}
+
+.field {
+  height: 33px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  padding: 0 10px;
+}
+
+.compact-field {
+  width: 72px;
+}
+
+.count {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+/* src/styles/layout.css */
+.app {
+  display: grid;
+  grid-template-rows: 56px 54px minmax(0, 1fr);
+  height: 100%;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 210px minmax(300px, 740px) minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0 16px;
+}
+
+.search-panel {
+  position: fixed;
+  top: 46px;
+  left: 226px;
+  z-index: 50;
+  width: min(720px, calc(100vw - 320px));
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+}
+
+.search-result {
+  display: block;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 9px 10px;
+  text-align: left;
+}
+
+.search-result:hover,
+.search-result.active {
+  border-color: var(--line);
+  background: #fbfbfa;
+}
+
+.search-kind {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.search-title {
+  display: block;
+  margin-top: 3px;
+  font-weight: 720;
+}
+
+.search-excerpt {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 780;
+}
+
+.search,
+.capture-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fbfbfa;
+  color: var(--ink);
+}
+
+.search {
+  height: 35px;
+  padding: 0 12px;
+}
+
+.capture {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 136px 132px;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  background: #fbfbfa;
+  padding: 9px 16px;
+}
+
+.capture-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.capture-input {
+  height: 36px;
+  padding: 0 12px;
+  font: 13px "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.shell {
+  min-height: 0;
+  display: grid;
+  grid-template-columns:
+    var(--nav-width, 208px)
+    5px
+    minmax(0, 1fr)
+    5px
+    var(--context-width, 324px);
+}
+
+.nav,
+.actions,
+.context {
+  min-height: 0;
+  overflow: auto;
+}
+
+.nav {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: 14px 10px;
+  position: relative;
+}
+
+.actions {
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  padding: 14px;
+  position: relative;
+}
+
+.actions,
+#resizeActionsHandle {
+  display: none;
+}
+
+.main {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 26px 34px;
+}
+
+.main-inner {
+  width: 100%;
+  margin: 0;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.context {
+  border-left: 1px solid var(--line);
+  background: var(--paper);
+  padding: 16px;
+  position: relative;
+}
+
+.pane-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-color: var(--line);
+  background: var(--paper);
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: auto;
+}
+
+.resize-handle {
+  min-width: 5px;
+  background: transparent;
+  cursor: col-resize;
+  position: relative;
+  z-index: 1;
+}
+
+.resize-handle:hover,
+.resize-handle.is-dragging {
+  background: #d4e3df;
+}
+
+.context .pane-toggle {
+  left: 8px;
+  right: auto;
+}
+
+.is-nav-collapsed {
+  --nav-width: 42px;
+}
+
+.is-context-collapsed {
+  --context-width: 42px;
+}
+
+.is-context-auto-hidden {
+  --context-width: 0px;
+}
+
+.is-context-disabled {
+  --context-width: 0px;
+}
+
+.is-nav-collapsed .nav,
+.is-context-collapsed .context {
+  overflow: hidden;
+  padding: 40px 8px 8px;
+}
+
+.is-context-auto-hidden .context {
+  display: none;
+}
+
+.is-context-disabled .context {
+  display: none;
+}
+
+.is-nav-collapsed .nav > :not(.pane-toggle),
+.is-context-collapsed .context > :not(.pane-toggle) {
+  display: none;
+}
+
+.is-nav-collapsed #resizeNavHandle,
+.is-context-collapsed #resizeContextHandle {
+  cursor: default;
+  background: transparent;
+}
+
+.is-context-auto-hidden #resizeContextHandle {
+  display: none;
+}
+
+.is-context-disabled #resizeContextHandle {
+  display: none;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.page-head h1 {
+  margin: 0 0 4px;
+  font-size: 27px;
+  letter-spacing: 0;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.health-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.todo-workspace {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 14px;
+}
+
+.todo-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px 190px;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.todo-search {
+  width: 100%;
+}
+
+.todo-large-list {
+  border-top: 1px solid var(--line-soft);
+}
+
+.raw-editor {
+  width: 100%;
+  min-height: 520px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.project-focus-grid {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) 240px;
+  gap: 14px;
+  align-items: start;
+}
+
+.journal-grid {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 220px;
+  gap: 14px;
+  align-items: start;
+}
+
+.project-focus-list,
+.project-side-panel {
+  position: sticky;
+  top: 0;
+}
+
+.focus-editor-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.linked-todos {
+  padding: 10px 12px 14px;
+}
+
+.journal-list {
+  padding: 10px;
+}
+
+.journal-card {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 10px;
+  text-align: left;
+}
+
+.journal-card.active,
+.journal-card:hover {
+  border-color: #9dbcb4;
+  background: #fbfbfa;
+}
+
+.compact-select {
+  width: 104px;
+}
+
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.calendar-grid {
+  padding: 12px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.calendar-days {
+  display: contents;
+}
+
+.weekday {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 760;
+  text-align: center;
+}
+
+.calendar-day {
+  min-height: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 8px;
+  text-align: left;
+}
+
+.calendar-day:hover,
+.calendar-day.active {
+  border-color: #9dbcb4;
+  background: #fbfbfa;
+}
+
+.calendar-day.muted {
+  background: #f7f7f4;
+  color: var(--quiet);
+}
+
+.calendar-day.today {
+  border-color: var(--green);
+}
+
+.calendar-day-number {
+  display: block;
+  font-weight: 760;
+}
+
+.calendar-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.calendar-badge {
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.calendar-badge.note {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.calendar-badge.todo {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.calendar-details {
+  padding: 10px 12px 14px;
+}
+
+@media (max-width: 1320px) {
+  body {
+    min-width: 0;
+  }
+
+  .shell {
+    grid-template-columns: var(--nav-width, 196px) 5px minmax(0, 1fr) 0;
+  }
+
+  .context {
+    display: none;
+  }
+
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* src/styles/components.css */
+.nav-title,
+.block-title {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.nav-title {
+  padding: 8px 8px 6px;
+}
+
+.nav-item {
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.nav-item.active,
+.nav-item:hover {
+  border-color: var(--line);
+  background: var(--paper);
+}
+
+.action-head,
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.action-head {
+  margin-bottom: 12px;
+}
+
+.action-head h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.mini-tabs,
+.segmented {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+  padding: 3px;
+}
+
+.mini-tabs {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 12px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+}
+
+.mini-tabs button,
+.segmented button {
+  height: 28px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.segmented button {
+  min-width: 78px;
+  font-size: 14px;
+}
+
+.mini-tabs button.active,
+.segmented button.active {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.block {
+  margin-bottom: 20px;
+}
+
+.block-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 12px 13px;
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.metric-value {
+  margin-top: 5px;
+  font-size: 23px;
+  font-weight: 780;
+}
+
+.metric-note {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.panel-head {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 14px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.project-list {
+  padding: 10px;
+}
+
+.project-card {
+  display: block;
+  width: 100%;
+  margin-bottom: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 12px;
+  text-align: left;
+}
+
+.project-card.active,
+.project-card:hover,
+.project-card.drop-target {
+  border-color: #9dbcb4;
+  background: #fbfbfa;
+}
+
+.project-card.drop-target {
+  box-shadow: inset 0 0 0 1px #9dbcb4;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.project-title,
+.row-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 720;
+}
+
+.age {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.summary {
+  margin: 8px 0 10px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.chip.green {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.chip.blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.chip.amber {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.chip.red {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.chip.violet {
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.journal-row,
+.inbox-row,
+.project-line {
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 9px 0;
+  text-align: left;
+}
+
+.row-meta {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.shortcut {
+  display: inline-flex;
+  min-width: 42px;
+  min-height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--panel-2);
+  color: var(--muted);
+  padding: 0 6px;
+  font: 11px "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.config-grid {
+  display: grid;
+  gap: 9px;
+}
+
+.config-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 8px 0;
+}
+
+.json-preview {
+  overflow: auto;
+  max-height: 150px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fbfbfa;
+  padding: 10px;
+  color: var(--muted);
+  font: 12px/1.45 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.snapshot-panel {
+  position: fixed;
+  top: 48px;
+  right: 16px;
+  z-index: 60;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(560px, calc(100vh - 76px));
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.14);
+  padding: 12px;
+}
+
+.snapshot-head,
+.snapshot-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.snapshot-head {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.snapshot-head span,
+.snapshot-meta,
+.empty-note {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.snapshot-row {
+  border-bottom: 1px solid var(--line-soft);
+  padding: 10px 0;
+}
+
+.snapshot-title {
+  font-weight: 720;
+}
+
+.snapshot-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+
+/* src/styles/todos.css */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 12px;
+}
+
+.filter-chip {
+  min-height: 24px;
+  border-color: var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--muted);
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.filter-chip.active {
+  border-color: #9dbcb4;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.todo-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 28px;
+  gap: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 9px 0;
+  text-align: left;
+}
+
+.todo-row.is-drag-over {
+  border-top: 2px solid var(--blue);
+}
+
+.todo-large-list .todo-row,
+.linked-todos .todo-row {
+  min-height: 42px;
+}
+
+.todo-row.is-completed {
+  opacity: 0.58;
+}
+
+.todo-row.is-completed .todo-text {
+  text-decoration: line-through;
+}
+
+.todo-row.has-duplicate-id {
+  background: #fff7ed;
+}
+
+.todo-row.has-duplicate-id .tok-id {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.todo-row.is-overdue {
+  background: #fff7ed;
+}
+
+.drag-handle {
+  color: var(--quiet);
+  font-size: 15px;
+  line-height: 1;
+  cursor: grab;
+}
+
+.box {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  border: 1px solid #c5c8c1;
+  border-radius: 3px;
+  background: var(--paper);
+}
+
+.todo-row.is-completed .box {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.todo-main {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.todo-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 13px "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.todo-text [data-token-type] {
+  cursor: pointer;
+}
+
+.todo-text.editable {
+  border-radius: 5px;
+  margin: -3px -5px;
+  padding: 3px 5px;
+}
+
+.todo-row:hover .todo-text.editable {
+  background: #f4f5f1;
+}
+
+.todo-editor {
+  width: 100%;
+  height: 28px;
+  border: 1px solid #9dbcb4;
+  border-radius: 5px;
+  padding: 0 7px;
+  font: 13px "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.todo-meta {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.todo-overdue {
+  display: inline-block;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--red-soft);
+  color: var(--red);
+  padding: 3px 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tok-project,
+.tok-context,
+.tok-key,
+.tok-priority,
+.tok-id,
+.tok-created,
+.tok-due,
+.tok-status {
+  border-radius: 4px;
+  padding: 0 3px;
+  font-weight: 700;
+}
+
+.tok-priority {
+  color: var(--red);
+}
+
+.tok-project {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.tok-context {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.tok-key {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.tok-id {
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.tok-created {
+  background: transparent;
+  color: #667064;
+  font-style: italic;
+  font-weight: 520;
+  padding: 0;
+}
+
+.tok-created.is-passive {
+  cursor: default;
+}
+
+.tok-due {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.tok-status {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.todo-display-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.todo-display-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.todo-delete {
+  width: 24px;
+  height: 24px;
+  align-self: center;
+  border-color: transparent;
+  color: var(--quiet);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.todo-row:hover .todo-delete {
+  border-color: var(--line);
+  color: var(--red);
+}
+
+
+/* src/styles/markdown.css */
+.document {
+  padding: 16px;
+}
+
+.title-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  padding: 0 0 12px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.doc-meta {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 9px;
+  margin: 13px 0;
+}
+
+.insert-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(8, 30px);
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfbfa;
+  padding: 7px;
+}
+
+.icon-choice {
+  width: 30px;
+  height: 30px;
+  border-color: var(--line);
+  background: var(--paper);
+  font-size: 15px;
+}
+
+.icon-choice:hover {
+  border-color: #b8beb7;
+  background: var(--green-soft);
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.editor-grid.editor-mode-write,
+.editor-grid.editor-mode-preview {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.editor-grid.editor-mode-write .preview,
+.editor-grid.editor-mode-preview .markdown {
+  display: none;
+}
+
+.markdown,
+.preview {
+  min-height: 430px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.markdown {
+  width: 100%;
+  resize: none;
+  padding: 16px;
+  font: 13px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.preview {
+  padding: 16px 18px;
+  line-height: 1.55;
+}
+
+.project-focus .markdown,
+.project-focus .preview {
+  min-height: clamp(520px, calc(100vh - 230px), 900px);
+}
+
+.overtype-host {
+  height: clamp(560px, calc(100vh - 230px), 900px);
+  min-height: 560px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.overtype-host > * {
+  height: 100%;
+  min-height: inherit;
+}
+
+.overtype-host textarea {
+  min-height: inherit !important;
+  font: 14px/1.6 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.preview h1 {
+  margin: 20px 0 8px;
+  font-size: 20px;
+}
+
+.preview h2,
+.preview h3 {
+  margin: 18px 0 8px;
+  font-size: 17px;
+}
+
+.preview h1:first-child,
+.preview h2:first-child,
+.preview h3:first-child {
+  margin-top: 0;
+}
+
+.preview code {
+  border-radius: 4px;
+  background: #eef0ec;
+  padding: 1px 5px;
+  font: 12px "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.preview pre {
+  overflow: auto;
+  border: 1px solid #d9ddd7;
+  border-radius: 7px;
+  background: #1f2428;
+  color: #d9e2ec;
+  padding: 12px;
+  font: 12px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.tok-keyword {
+  color: #ffcc66;
+}
+
+.tok-string {
+  color: #8bd49c;
+}
+
+.tok-fn {
+  color: #82aaff;
+}
+
+  </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">Worklog</div>
+        <input id="searchInput" class="search" placeholder="Rechercher projet, todo, note ou commande...">
+        <div></div>
+        <button id="importButton" class="button">Import JSON</button>
+        <button id="snapshotsButton" class="button">Snapshots</button>
+        <button id="exportButton" class="button primary">Export JSON</button>
+        <input id="importFileInput" class="hidden" type="file" accept="application/json,.json">
+      </header>
+      <div id="searchPanel" class="search-panel hidden"></div>
+      <div id="snapshotPanel" class="snapshot-panel hidden">
+        <div class="snapshot-head">
+          <div>
+            <strong>Snapshots locaux</strong>
+            <span>créés avant import et édition raw</span>
+          </div>
+          <button id="closeSnapshotsButton" class="button">Fermer</button>
+        </div>
+        <div id="snapshotList" class="snapshot-list"></div>
+      </div>
+
+      <section class="capture">
+        <div class="capture-label">Capture todo.txt</div>
+        <input id="captureInput" class="capture-input" placeholder="(A) Relancer Pierre +ISO20022 @mail followup:2026-05-23">
+        <button id="insertDateButton" class="button">Insérer date</button>
+        <button id="addTodoButton" class="button primary">Ajouter</button>
+      </section>
+
+      <div class="shell">
+        <aside class="nav">
+          <button id="toggleNavButton" class="pane-toggle" title="Réduire navigation">‹</button>
+          <div class="nav-title">Travail</div>
+          <button class="nav-item active" data-view-button="home"><span>Accueil</span><span id="openProjectsCount" class="count"></span></button>
+          <button class="nav-item" data-view-button="project"><span>Projets</span><span id="projectCount" class="count"></span></button>
+          <button class="nav-item" data-view-button="todos"><span>Todos</span><span id="todoCount" class="count"></span></button>
+          <button class="nav-item" data-view-button="journal"><span>Journal</span><span id="journalCount" class="count"></span></button>
+          <button class="nav-item" data-view-button="calendar"><span>Calendrier</span></button>
+
+          <div class="nav-title">Actions</div>
+          <button class="nav-item"><span>Inbox</span><span id="inboxNavCount" class="count"></span></button>
+          <button class="nav-item"><span>Relances</span><span id="followupNavCount" class="count"></span></button>
+          <button class="nav-item"><span>Aujourd'hui</span><span id="todayNavCount" class="count"></span></button>
+          <button class="nav-item"><span>Priorités A</span><span id="priorityNavCount" class="count"></span></button>
+
+          <div class="nav-title">État projets</div>
+          <button class="nav-item"><span>Active</span><span class="count">2</span></button>
+          <button class="nav-item"><span>Waiting</span><span class="count">1</span></button>
+          <button class="nav-item"><span>Blocked</span><span class="count">0</span></button>
+          <button class="nav-item"><span>Dormant</span><span class="count">1</span></button>
+        </aside>
+        <div id="resizeNavHandle" class="resize-handle resize-handle-left" title="Redimensionner navigation"></div>
+
+        <aside class="actions">
+          <button id="toggleActionsButton" class="pane-toggle" title="Réduire actions">‹</button>
+          <div class="action-head">
+            <h1>Actions</h1>
+            <button id="rawButton" class="button">Raw</button>
+          </div>
+          <div class="mini-tabs">
+            <button class="active" data-filter-tab="now">Maintenant</button>
+            <button data-filter-tab="project">Projet</button>
+            <button data-filter-tab="all">Toutes</button>
+          </div>
+          <div id="filterChips" class="filter-chips"></div>
+
+          <section class="block">
+            <div class="block-title"><span>À traiter</span><span id="inboxCount"></span></div>
+            <div id="inboxTodos"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span>Relances</span><span id="followupCount"></span></div>
+            <div id="followupTodos"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span>Priorités</span><span id="priorityCount"></span></div>
+            <div id="priorityTodos"></div>
+          </section>
+        </aside>
+        <div id="resizeActionsHandle" class="resize-handle resize-handle-left" title="Redimensionner actions"></div>
+
+        <main class="main">
+          <section class="view active" data-view="home">
+          <div class="main-inner">
+            <div class="page-head">
+              <div>
+                <h1>Bureau de suivi</h1>
+                <div class="subtitle">Capturer vite, suivre les actions, retrouver le contexte projet.</div>
+              </div>
+              <div class="toolbar">
+                <div class="segmented">
+                  <button class="active">Focus</button>
+                  <button>Board</button>
+                  <button>Journal</button>
+                </div>
+                <button class="button">Nouveau journal</button>
+              </div>
+            </div>
+
+            <section class="health-row">
+              <div class="metric">
+                <div class="metric-label">Projets ouverts</div>
+                <div id="metricProjects" class="metric-value"></div>
+                <div class="metric-note">incidents inclus</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Todos ouverts</div>
+                <div id="metricTodos" class="metric-value"></div>
+                <div id="metricInbox" class="metric-note"></div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Relances</div>
+                <div id="metricFollowups" class="metric-value"></div>
+                <div class="metric-note">via followup:</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Sans mouvement</div>
+                <div id="metricDormant" class="metric-value"></div>
+                <div class="metric-note">plus de 14 jours</div>
+              </div>
+            </section>
+
+            <section class="workspace-grid">
+              <section class="panel">
+                <div class="panel-head">
+                  <h2>Projets à surveiller</h2>
+                  <button class="button">Voir tout</button>
+                </div>
+                <div id="projectList" class="project-list"></div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-head">
+                  <h2>Projet ouvert</h2>
+                  <div class="segmented" data-editor-mode-tabs="projectHome">
+                    <button data-editor-mode-button="projectHome:write">Markdown</button>
+                    <button class="active" data-editor-mode-button="projectHome:split">Split</button>
+                    <button data-editor-mode-button="projectHome:preview">Preview</button>
+                  </div>
+                </div>
+                <div class="document">
+                  <input id="projectTitle" class="title-input">
+                  <div class="insert-bar">
+                    <button id="insertProjectDateButton" class="button">Insérer date</button>
+                    <button class="button" data-insert-template="decision">Décision</button>
+                    <button class="button" data-insert-template="question">Question</button>
+                    <button class="button" data-insert-template="code">Code</button>
+                    <div class="icon-picker" aria-label="Sélecteur d'icône Markdown">
+                      <button class="icon-choice" data-icon="ℹ" title="Information">i</button>
+                      <button class="icon-choice" data-icon="✓" title="Décision">✓</button>
+                      <button class="icon-choice" data-icon="?" title="Question">?</button>
+                      <button class="icon-choice" data-icon="!" title="Attention">!</button>
+                      <button class="icon-choice" data-icon="#" title="Lien">#</button>
+                      <button class="icon-choice" data-icon="{}" title="Code">{ }</button>
+                      <button class="icon-choice" data-icon="☎" title="Téléphone">☎</button>
+                      <button class="icon-choice" data-icon="@" title="Mail">@</button>
+                    </div>
+                  </div>
+                  <div id="projectEditorGrid" class="editor-grid">
+                    <textarea id="projectBody" class="markdown"></textarea>
+                    <article id="projectPreview" class="preview"></article>
+                  </div>
+                </div>
+              </section>
+            </section>
+          </div>
+          </section>
+
+          <section class="view" data-view="todos">
+            <div class="main-inner">
+              <div class="page-head">
+                <div>
+                  <h1>Todos</h1>
+                  <div class="subtitle">Vue focalisée pour traiter les actions, relances et texte brut todo.txt.</div>
+                </div>
+                <div class="toolbar">
+                  <div class="segmented">
+                    <button class="active" data-todo-mode="open">Ouverts</button>
+                    <button data-todo-mode="done">Terminés</button>
+                    <button data-todo-mode="raw">Raw</button>
+                  </div>
+                </div>
+              </div>
+
+              <section class="todo-workspace">
+                <div class="todo-toolbar">
+                  <input id="todoViewSearch" class="field todo-search" placeholder="Filtrer dans les todos...">
+                  <select id="todoViewProjectFilter" class="field">
+                    <option value="">Tous les projets</option>
+                  </select>
+                  <select id="todoViewContextFilter" class="field">
+                    <option value="">Tous les contextes</option>
+                  </select>
+                  <select id="todoSortSelect" class="field">
+                    <option value="file">Ordre du fichier</option>
+                    <option value="due">Par échéance</option>
+                    <option value="priority">Par priorité</option>
+                  </select>
+                </div>
+                <div class="todo-display-options">
+                  <label><input id="todoShowId" type="checkbox"> id</label>
+                  <label><input id="todoShowCreated" type="checkbox"> création</label>
+                  <label><input id="todoShowDue" type="checkbox"> due</label>
+                  <label><input id="todoShowProject" type="checkbox"> projet</label>
+                  <label><input id="todoShowContext" type="checkbox"> contexte</label>
+                </div>
+                <div id="todoViewList" class="todo-large-list"></div>
+                <textarea id="todoRawEditor" class="raw-editor hidden" spellcheck="false"></textarea>
+              </section>
+            </div>
+          </section>
+
+          <section class="view" data-view="project">
+            <div class="main-inner project-focus">
+              <div class="page-head">
+                <div>
+                  <h1>Projet</h1>
+                  <div class="subtitle">Vue calme pour lire, écrire et retrouver le contexte d'un sujet.</div>
+                </div>
+                <div class="toolbar">
+                  <button id="newProjectButton" class="button primary">Nouveau projet</button>
+                  <button id="archiveProjectButton" class="button">Archiver</button>
+                  <button id="deleteProjectButton" class="button danger">Supprimer</button>
+                </div>
+              </div>
+
+              <section class="project-focus-grid">
+                <aside class="panel project-focus-list">
+                  <div class="panel-head">
+                    <h2>Projets</h2>
+                    <span id="projectFocusCount" class="count"></span>
+                  </div>
+                  <div id="projectFocusList" class="project-list"></div>
+                </aside>
+
+                <section class="panel">
+                  <div class="panel-head">
+                    <h2>Document projet</h2>
+                    <div class="segmented" data-editor-mode-tabs="project">
+                      <button data-editor-mode-button="project:write">Markdown</button>
+                      <button class="active" data-editor-mode-button="project:split">Split</button>
+                      <button data-editor-mode-button="project:preview">Preview</button>
+                    </div>
+                  </div>
+                  <div class="document">
+                    <input id="projectFocusTitle" class="title-input">
+                    <div id="projectFocusEditorGrid" class="editor-grid focus-editor-grid">
+                      <textarea id="projectFocusBody" class="markdown"></textarea>
+                      <article id="projectFocusPreview" class="preview"></article>
+                    </div>
+                  </div>
+                </section>
+
+                <aside class="panel project-side-panel">
+                  <div class="panel-head">
+                    <h2>Actions liées</h2>
+                    <button id="projectNewJournalButton" class="button">Note</button>
+                  </div>
+                  <div id="projectLinkedTodos" class="linked-todos"></div>
+                </aside>
+              </section>
+            </div>
+          </section>
+
+          <section class="view" data-view="journal">
+            <div class="main-inner project-focus">
+              <div class="page-head">
+                <div>
+                  <h1>Journal</h1>
+                  <div class="subtitle">Préparer une séance, noter ce qui s'est passé, puis relier aux projets.</div>
+                </div>
+                <div class="toolbar">
+                  <button id="newJournalButton" class="button primary">Nouvelle note</button>
+                  <button id="deleteJournalButton" class="button danger">Supprimer</button>
+                </div>
+              </div>
+
+              <section class="journal-grid">
+                <aside class="panel journal-list-panel">
+                  <div class="panel-head">
+                    <h2>Notes</h2>
+                    <select id="journalKindFilter" class="field compact-select">
+                      <option value="">Tous</option>
+                      <option value="note">note</option>
+                      <option value="meeting">meeting</option>
+                      <option value="incident">incident</option>
+                      <option value="worklog">worklog</option>
+                    </select>
+                  </div>
+                  <div id="journalList" class="journal-list"></div>
+                </aside>
+
+                <section class="panel">
+                  <div class="panel-head">
+                    <h2>Note ouverte</h2>
+                  </div>
+                  <div class="document">
+                    <input id="journalTitle" class="title-input">
+                    <div class="insert-bar">
+                      <button id="insertJournalDateButton" class="button">Insérer date</button>
+                      <button id="journalTodoFromSelectionButton" class="button">Todo depuis sélection</button>
+                      <button id="journalExtractTasksButton" class="button">Extraire cases</button>
+                      <button id="journalAppendProjectButton" class="button">Ajouter au projet</button>
+                    </div>
+                    <div id="journalEditorHost" class="overtype-host"></div>
+                    <textarea id="journalBody" class="hidden"># Notes</textarea>
+                  </div>
+                </section>
+
+                <aside class="panel project-side-panel">
+                  <div class="panel-head">
+                    <h2>Liens</h2>
+                  </div>
+                  <div id="journalLinks" class="linked-todos"></div>
+                </aside>
+              </section>
+            </div>
+          </section>
+
+          <section class="view" data-view="calendar">
+            <div class="main-inner project-focus">
+              <div class="page-head">
+                <div>
+                  <h1>Calendrier</h1>
+                  <div class="subtitle">Vue mensuelle simple pour retrouver notes, relances et échéances.</div>
+                </div>
+                <div class="toolbar">
+                  <button id="calendarPrevButton" class="button">Mois précédent</button>
+                  <button id="calendarTodayButton" class="button">Aujourd'hui</button>
+                  <button id="calendarNextButton" class="button">Mois suivant</button>
+                </div>
+              </div>
+
+              <section class="calendar-layout">
+                <section class="panel">
+                  <div class="panel-head">
+                    <h2 id="calendarMonthLabel">Mois</h2>
+                  </div>
+                  <div class="calendar-grid">
+                    <div class="weekday">Lun</div>
+                    <div class="weekday">Mar</div>
+                    <div class="weekday">Mer</div>
+                    <div class="weekday">Jeu</div>
+                    <div class="weekday">Ven</div>
+                    <div class="weekday">Sam</div>
+                    <div class="weekday">Dim</div>
+                    <div id="calendarDays" class="calendar-days"></div>
+                  </div>
+                </section>
+
+                <aside class="panel">
+                  <div class="panel-head">
+                    <h2 id="calendarSelectedLabel">Jour</h2>
+                  </div>
+                  <div id="calendarDayDetails" class="calendar-details"></div>
+                </aside>
+              </section>
+            </div>
+          </section>
+        </main>
+        <div id="resizeContextHandle" class="resize-handle resize-handle-right" title="Redimensionner contexte"></div>
+
+        <aside class="context">
+          <button id="toggleContextButton" class="pane-toggle" title="Réduire contexte">›</button>
+          <section class="block">
+            <div class="block-title"><span>Journal du jour</span><span>3</span></div>
+            <button class="journal-row">
+              <span class="row-title">09:14 Incident PACS.002</span>
+              <span class="row-meta">lié à ISO20022</span>
+            </button>
+            <button class="journal-row">
+              <span class="row-title">10:35 Discussion avec Daniel</span>
+              <span class="row-meta">notes à trier</span>
+            </button>
+            <button class="journal-row">
+              <span class="row-title">15:20 Point migration API</span>
+              <span class="row-meta">préparation séance</span>
+            </button>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span>Raccourcis</span><span></span></div>
+            <button class="project-line"><span class="row-title"><span class="shortcut">Ctrl+D</span> Insérer date</span><span class="row-meta">22.05.2026 ou 2026-05-23 selon config</span></button>
+            <button class="project-line"><span class="row-title"><span class="shortcut">Ctrl+Enter</span> Capturer todo</span><span class="row-meta">ajoute depuis le champ todo.txt</span></button>
+            <button class="project-line"><span class="row-title"><span class="shortcut">Ctrl+K</span> Recherche</span><span class="row-meta">focus sur la recherche</span></button>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span>À ranger</span><span id="triageCount"></span></div>
+            <div id="triageList"></div>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span id="selectedProjectName">Projet</span><span></span></div>
+            <button class="project-line"><span class="row-title">Todos liés</span><span id="selectedProjectTodos" class="row-meta"></span></button>
+            <button class="project-line"><span class="row-title">Notes liées</span><span class="row-meta">édition Markdown locale</span></button>
+            <button class="project-line"><span class="row-title">Dernier mouvement</span><span id="selectedProjectActivity" class="row-meta"></span></button>
+          </section>
+
+          <section class="block">
+            <div class="block-title"><span>Configuration</span><span>JSON</span></div>
+            <div class="config-grid">
+              <label class="config-row"><span><span class="row-title">Auto ID todo</span><span class="row-meta">ajoute id:xxxxxxx</span></span><input id="autoIdToggle" type="checkbox"></label>
+              <label class="config-row"><span><span class="row-title">Format date</span><span class="row-meta">insertion Markdown</span></span><select id="dateFormatSelect" class="field"><option value="DD.MM.YYYY">DD.MM.YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option></select></label>
+              <label class="config-row"><span><span class="row-title">Inactivité projet</span><span class="row-meta">jours avant dormant</span></span><input id="staleDaysInput" class="field compact-field" type="number" min="1"></label>
+              <pre id="configPreview" class="json-preview"></pre>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>    <script type="module">
+// src/core/config.js
+const defaultConfig = {
+  dateInsert: "DD.MM.YYYY",
+  staleAfterDays: 14,
+  todo: {
+    autoId: true,
+    idKey: "id",
+    idRandomLength: 2,
+    statusKey: "status",
+    keys: ["due", "followup", "waiting", "status", "id"],
+    sortMode: "file",
+    visibleTokens: {
+      id: true,
+      created: true,
+      due: true,
+      project: true,
+      context: true,
+    },
+  },
+  markdown: {
+    codeHighlight: true,
+  },
+  layout: {
+    navCollapsed: false,
+    actionsCollapsed: false,
+    contextCollapsed: false,
+    navWidth: 208,
+    actionsWidth: 308,
+    contextWidth: 324,
+  },
+};
+function mergeConfig(savedConfig = {}) {
+  return {
+    ...defaultConfig,
+    ...savedConfig,
+    todo: {
+      ...defaultConfig.todo,
+      ...(savedConfig.todo || {}),
+      visibleTokens: {
+        ...defaultConfig.todo.visibleTokens,
+        ...((savedConfig.todo || {}).visibleTokens || {}),
+      },
+    },
+    markdown: {
+      ...defaultConfig.markdown,
+      ...(savedConfig.markdown || {}),
+    },
+    layout: {
+      ...defaultConfig.layout,
+      ...(savedConfig.layout || {}),
+    },
+  };
+}
+
+// src/core/dates.js
+function todayISO(date = new Date()) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+function formatDate(date = new Date(), format = "DD.MM.YYYY") {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+
+  if (format === "YYYY-MM-DD") {
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  return `${dd}.${mm}.${yyyy}`;
+}
+function daysBetween(dateLike, now = new Date()) {
+  if (!dateLike) return 0;
+  const then = new Date(dateLike);
+  if (Number.isNaN(then.getTime())) return 0;
+  const start = new Date(then.getFullYear(), then.getMonth(), then.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.floor((end - start) / 86400000);
+}
+
+// src/core/ids.js
+function toBase36(value) {
+  return Number(value).toString(36).toUpperCase();
+}
+function createShortId(date = new Date(), randomLength = 2) {
+  const parts = [
+    toBase36(date.getMonth() + 1),
+    toBase36(date.getDate()),
+    toBase36(date.getHours()),
+    toBase36(date.getMinutes()),
+    toBase36(Math.floor(date.getSeconds() / 10)),
+  ];
+
+  for (let index = 0; index < randomLength; index += 1) {
+    parts.push(Math.floor(Math.random() * 36).toString(36).toUpperCase());
+  }
+
+  return parts.join("");
+}
+function ensureTodoId(raw, config) {
+  const idKey = config.todo.idKey;
+  if (new RegExp(`(?:^|\\s)${idKey}:[^\\s]+`).test(raw)) {
+    return raw;
+  }
+
+  return `${raw.trim()} ${idKey}:${createShortId(new Date(), config.todo.idRandomLength)}`.trim();
+}
+
+// src/core/schema.js
+const WORKLOG_SCHEMA_VERSION = 1;
+function stampSchema(state) {
+  return {
+    ...state,
+    schemaVersion: WORKLOG_SCHEMA_VERSION,
+  };
+}
+function migrateStateSchema(state) {
+  const version = Number(state.schemaVersion || 1);
+  if (version > WORKLOG_SCHEMA_VERSION) {
+    throw new Error(`Schema trop recent: ${version}`);
+  }
+  return stampSchema(state);
+}
+function validateImportPayload(payload) {
+  const errors = [];
+
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    errors.push("Le fichier ne contient pas un objet JSON exploitable.");
+    return { ok: false, errors, state: null };
+  }
+
+  if (payload.app !== "worklog") {
+    errors.push("Le fichier n'est pas un export Worklog.");
+  }
+  if (payload.version !== 1) {
+    errors.push("Version d'export invalide ou manquante.");
+  }
+  if (payload.schemaVersion !== WORKLOG_SCHEMA_VERSION) {
+    errors.push(`Schema attendu: ${WORKLOG_SCHEMA_VERSION}.`);
+  }
+  if (!payload.state || typeof payload.state !== "object" || Array.isArray(payload.state)) {
+    errors.push("Le champ `state` est manquant ou invalide.");
+    return { ok: false, errors, state: null };
+  }
+
+  const sourceState = payload.state;
+  if (!Array.isArray(sourceState.todos)) errors.push("`state.todos` doit etre une liste.");
+  if (!Array.isArray(sourceState.projects)) errors.push("`state.projects` doit etre une liste.");
+  if (!Array.isArray(sourceState.journal)) errors.push("`state.journal` doit etre une liste.");
+  if (!sourceState.config || typeof sourceState.config !== "object") errors.push("`state.config` doit etre un objet.");
+
+  for (const [index, todo] of (sourceState.todos || []).entries()) {
+    if (!todo || typeof todo !== "object" || typeof todo.raw !== "string") {
+      errors.push(`Todo ${index + 1}: champ raw manquant ou invalide.`);
+    }
+  }
+
+  for (const [index, project] of (sourceState.projects || []).entries()) {
+    if (!project || typeof project !== "object" || typeof project.title !== "string") {
+      errors.push(`Projet ${index + 1}: titre manquant ou invalide.`);
+    }
+  }
+
+  for (const [index, note] of (sourceState.journal || []).entries()) {
+    if (!note || typeof note !== "object" || typeof note.title !== "string") {
+      errors.push(`Note ${index + 1}: titre manquant ou invalide.`);
+    }
+  }
+
+  return { ok: errors.length === 0, errors, state: sourceState };
+}
+
+// src/markdown/overtype-adapter.js
+const OVERTYPE_JS_URL = "https://cdn.jsdelivr.net/npm/overtype@latest/dist/overtype.min.js";
+
+let overtypePromise = null;
+
+function loadOverTypeScript() {
+  if (window.OverType) return Promise.resolve();
+  if (overtypePromise) return overtypePromise;
+
+  overtypePromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = OVERTYPE_JS_URL;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Chargement impossible: ${OVERTYPE_JS_URL}`));
+    document.head.append(script);
+  });
+
+  return overtypePromise;
+}
+async function createOverTypeEditor({ host, markdown, onChange }) {
+  await loadOverTypeScript();
+  host.innerHTML = "";
+  host.style.height = "clamp(560px, calc(100vh - 230px), 900px)";
+  host.style.minHeight = "560px";
+
+  const created = new window.OverType(host, {
+    value: markdown || "",
+    toolbar: true,
+    spellcheck: false,
+    showStats: false,
+    autoResize: false,
+    height: "640px",
+    onChange: (value) => onChange(value || ""),
+  });
+  const editor = Array.isArray(created) ? created[0] : created;
+
+  function textarea() {
+    return editor.textarea || host.querySelector("textarea");
+  }
+
+  return {
+    getMarkdown: () => editor.getValue(),
+    getSelection: () => {
+      const input = textarea();
+      if (!input) return "";
+      return input.value.slice(input.selectionStart, input.selectionEnd);
+    },
+    setMarkdown: (nextMarkdown) => {
+      editor.setValue(nextMarkdown || "");
+    },
+    insertBlock: (text) => {
+      const input = textarea();
+      if (!input) return;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const prefix = start === 0 || input.value[start - 1] === "\n" ? "" : "\n";
+      const next = `${input.value.slice(0, start)}${prefix}${text}${input.value.slice(end)}`;
+      editor.setValue(next);
+      const cursor = start + prefix.length + text.length;
+      input.selectionStart = cursor;
+      input.selectionEnd = cursor;
+      input.focus();
+      onChange(editor.getValue());
+    },
+    destroy: () => editor.destroy?.(),
+  };
+}
+
+// src/markdown/frontmatter.js
+function parseFrontmatter(markdown) {
+  if (!markdown.startsWith("---\n")) {
+    return { data: {}, body: markdown };
+  }
+
+  const end = markdown.indexOf("\n---", 4);
+  if (end === -1) {
+    return { data: {}, body: markdown };
+  }
+
+  const raw = markdown.slice(4, end).trim();
+  const body = markdown.slice(end + 4).replace(/^\n/, "");
+  const data = {};
+
+  for (const line of raw.split("\n")) {
+    const separator = line.indexOf(":");
+    if (separator === -1) continue;
+    const key = line.slice(0, separator).trim();
+    const value = line.slice(separator + 1).trim();
+    data[key] = parseYamlValue(value);
+  }
+
+  return { data, body };
+}
+function readArrayValue(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  return String(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseYamlValue(value) {
+  if (value.startsWith("[") && value.endsWith("]")) {
+    const inner = value.slice(1, -1).trim();
+    if (!inner) return [];
+    return inner.split(",").map((item) => item.trim());
+  }
+  return value;
+}
+
+// src/markdown/markdown.js
+function escapeMarkdownHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function highlightCode(code) {
+  return escapeMarkdownHtml(code)
+    .replace(/\b(const|let|var|function|if|return|for|of|import|export|from)\b/g, '<span class="tok-keyword">$1</span>')
+    .replace(/(&quot;.*?&quot;|'.*?')/g, '<span class="tok-string">$1</span>')
+    .replace(/\b([a-zA-Z_$][\w$]*)(?=\()/g, '<span class="tok-fn">$1</span>');
+}
+function markdownToHtml(markdown) {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const html = [];
+  let inList = false;
+  let inCode = false;
+  let codeLines = [];
+
+  function closeList() {
+    if (inList) {
+      html.push("</ul>");
+      inList = false;
+    }
+  }
+
+  for (const line of lines) {
+    if (line.startsWith("```")) {
+      if (inCode) {
+        html.push(`<pre><code>${highlightCode(codeLines.join("\n"))}</code></pre>`);
+        codeLines = [];
+        inCode = false;
+      } else {
+        closeList();
+        inCode = true;
+      }
+      continue;
+    }
+
+    if (inCode) {
+      codeLines.push(line);
+      continue;
+    }
+
+    if (!line.trim()) {
+      closeList();
+      continue;
+    }
+
+    if (line.startsWith("# ")) {
+      closeList();
+      html.push(`<h1>${escapeMarkdownHtml(line.slice(2))}</h1>`);
+    } else if (line.startsWith("## ")) {
+      closeList();
+      html.push(`<h2>${escapeMarkdownHtml(line.slice(3))}</h2>`);
+    } else if (line.startsWith("### ")) {
+      closeList();
+      html.push(`<h3>${escapeMarkdownHtml(line.slice(4))}</h3>`);
+    } else if (line.startsWith("- ")) {
+      if (!inList) {
+        html.push("<ul>");
+        inList = true;
+      }
+      html.push(`<li>${escapeMarkdownHtml(line.slice(2))}</li>`);
+    } else if (line === "---") {
+      closeList();
+      html.push('<hr class="frontmatter-rule">');
+    } else {
+      closeList();
+      html.push(`<p>${escapeMarkdownHtml(line)}</p>`);
+    }
+  }
+
+  closeList();
+  return html.join("");
+}
+
+// src/storage/local-store.js
+const STORAGE_KEY = "worklog.dev.state.v1";
+const SNAPSHOTS_KEY = "worklog.dev.snapshots.v1";
+const MAX_SNAPSHOTS = 10;
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Impossible de lire le stockage local", error);
+    return null;
+  }
+}
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function loadSnapshots() {
+  try {
+    const raw = localStorage.getItem(SNAPSHOTS_KEY);
+    const snapshots = raw ? JSON.parse(raw) : [];
+    return Array.isArray(snapshots) ? snapshots : [];
+  } catch (error) {
+    console.warn("Impossible de lire les snapshots locaux", error);
+    return [];
+  }
+}
+function saveSnapshot(label, state) {
+  try {
+    const now = new Date();
+    const snapshot = {
+      id: `snapshot-${now.getTime()}-${Math.random().toString(36).slice(2, 7)}`,
+      label,
+      createdAt: now.toISOString(),
+      counts: {
+        todos: state.todos?.length || 0,
+        projects: state.projects?.length || 0,
+        journal: state.journal?.length || 0,
+      },
+      state: JSON.parse(JSON.stringify(state)),
+    };
+    const snapshots = [snapshot, ...loadSnapshots()].slice(0, MAX_SNAPSHOTS);
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+    return snapshot;
+  } catch (error) {
+    console.warn("Impossible de creer un snapshot local", error);
+    return null;
+  }
+}
+function deleteSnapshot(snapshotId) {
+  try {
+    const snapshots = loadSnapshots().filter((snapshot) => snapshot.id !== snapshotId);
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  } catch (error) {
+    console.warn("Impossible de supprimer le snapshot local", error);
+  }
+}
+
+function downloadWorklogJson(filename, payload) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+function exportState(state) {
+  const stamp = new Date().toISOString().slice(0, 19).replaceAll(":", "").replace("T", "-");
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    app: "worklog",
+    version: 1,
+    schemaVersion: state.schemaVersion || WORKLOG_SCHEMA_VERSION,
+    state,
+  };
+  downloadWorklogJson(`backup-${stamp}.json`, payload);
+}
+function exportSnapshot(snapshot) {
+  const stamp = snapshot.createdAt.slice(0, 19).replaceAll(":", "").replace("T", "-");
+  downloadWorklogJson(`snapshot-${stamp}.json`, {
+    exportedAt: new Date().toISOString(),
+    app: "worklog",
+    version: 1,
+    schemaVersion: snapshot.state?.schemaVersion || WORKLOG_SCHEMA_VERSION,
+    snapshot,
+    state: snapshot.state,
+  });
+}
+
+// src/storage/db.js
+const DB_NAME = "worklog";
+const DB_VERSION = 1;
+const STATE_STORE = "state";
+
+function requestToPromise(request) {
+  return new Promise((resolve, reject) => {
+    request.addEventListener("success", () => resolve(request.result));
+    request.addEventListener("error", () => reject(request.error));
+  });
+}
+async function openDb() {
+  if (!("indexedDB" in window)) {
+    throw new Error("IndexedDB indisponible");
+  }
+
+  const request = indexedDB.open(DB_NAME, DB_VERSION);
+  request.addEventListener("upgradeneeded", () => {
+    const db = request.result;
+    if (!db.objectStoreNames.contains(STATE_STORE)) {
+      db.createObjectStore(STATE_STORE, { keyPath: "id" });
+    }
+  });
+
+  return requestToPromise(request);
+}
+async function getStateRecord() {
+  const db = await openDb();
+  const transaction = db.transaction(STATE_STORE, "readonly");
+  const store = transaction.objectStore(STATE_STORE);
+  return requestToPromise(store.get("app"));
+}
+async function putStateRecord(state) {
+  const db = await openDb();
+  const transaction = db.transaction(STATE_STORE, "readwrite");
+  const store = transaction.objectStore(STATE_STORE);
+  await requestToPromise(store.put({ id: "app", state, updatedAt: new Date().toISOString() }));
+}
+
+// src/storage/repositories.js
+let fallbackMode = false;
+async function loadAppState() {
+  if (fallbackMode) return loadState();
+
+  try {
+    const record = await getStateRecord();
+    return record?.state || loadState();
+  } catch (error) {
+    console.warn("IndexedDB indisponible, fallback localStorage", error);
+    fallbackMode = true;
+    return loadState();
+  }
+}
+async function saveAppState(state) {
+  saveState(state);
+
+  if (fallbackMode) return;
+
+  try {
+    await putStateRecord(state);
+  } catch (error) {
+    console.warn("Sauvegarde IndexedDB impossible, fallback localStorage", error);
+    fallbackMode = true;
+  }
+}
+function usingFallbackStorage() {
+  return fallbackMode;
+}
+
+// src/data/seed.js
+const seedState = {
+  schemaVersion: 1,
+  todos: [
+    {
+      id: "5N9AC2K",
+      raw: "(A) Relancer Pierre pour document +ISO20022 @mail followup:2026-05-23 id:5N9AC2K",
+      createdAt: "2026-05-23T09:14:00.000Z",
+      updatedAt: "2026-05-23T09:14:00.000Z",
+    },
+    {
+      id: "5N9AE1P",
+      raw: "noter décision Jean sur mapping +ISO20022 id:5N9AE1P",
+      createdAt: "2026-05-23T10:35:00.000Z",
+      updatedAt: "2026-05-23T10:35:00.000Z",
+    },
+    {
+      id: "5N9B04A",
+      raw: "vérifier accès recette @bureau id:5N9B04A",
+      createdAt: "2026-05-23T11:00:00.000Z",
+      updatedAt: "2026-05-23T11:00:00.000Z",
+    },
+    {
+      id: "5N9B36G",
+      raw: "(B) Relancer fournisseur +FournisseurXML waiting:daniel id:5N9B36G",
+      createdAt: "2026-05-23T11:12:00.000Z",
+      updatedAt: "2026-05-23T11:12:00.000Z",
+    },
+    {
+      id: "5N9BD8R",
+      raw: "(A) Finaliser plan +ISO20022 @bureau due:2026-05-24 id:5N9BD8R",
+      createdAt: "2026-05-23T12:01:00.000Z",
+      updatedAt: "2026-05-23T12:01:00.000Z",
+    },
+  ],
+  projects: [
+    {
+      id: "project-iso20022",
+      title: "ISO20022",
+      status: "active",
+      kind: "incident",
+      tags: ["pacs", "fournisseur"],
+      summary: "Incident PACS.002 en cours, mapping fournisseur à valider.",
+      updatedAt: "2026-05-23T09:14:00.000Z",
+      body: `---
+type: project
+kind: incident
+status: active
+tags: [pacs, fournisseur]
+staleAfterDays: 14
+---
+
+# Contexte
+
+Suivi de l'incident PACS.002 et des impacts ISO20022.
+
+# Liens utiles
+
+- ticket fournisseur
+- documentation mapping
+
+# Avancement
+
+## 23.05.2026
+
+- Tel à Pierre, en attente de son document.
+- Mail envoyé à Jean.
+- Décision : garder le contournement actuel.
+
+# Questions ouvertes
+
+- Qui valide l'exemple XML final ?
+- Le fournisseur confirme-t-il le format ?
+
+# Exemple technique
+
+\`\`\`js
+const due = parseToken("followup:2026-05-23");
+if (due.isToday()) {
+  showInFollowups(todo);
+}
+\`\`\`
+`,
+    },
+    {
+      id: "project-fournisseurxml",
+      title: "FournisseurXML",
+      status: "waiting",
+      kind: "suivi",
+      tags: ["mail"],
+      summary: "En attente d'un exemple corrigé, relance prévue aujourd'hui.",
+      updatedAt: "2026-05-19T14:20:00.000Z",
+      body: "# Contexte\n\nSuivi du retour fournisseur XML.\n",
+    },
+    {
+      id: "project-runbook",
+      title: "Documentation runbook",
+      status: "dormant",
+      kind: "documentation",
+      tags: ["review"],
+      summary: "Aucune note depuis plus de deux semaines, à reprendre ou fermer.",
+      updatedAt: "2026-05-01T08:30:00.000Z",
+      body: "# Contexte\n\nRunbook à reprendre quand les urgences sont passées.\n",
+    },
+  ],
+  journal: [
+    {
+      id: "journal-incident-pacs",
+      title: "2026-05-23 - Incident PACS.002",
+      date: "2026-05-23",
+      kind: "incident",
+      projects: ["ISO20022"],
+      tags: ["incident", "pacs"],
+      createdAt: "2026-05-23T09:14:00.000Z",
+      updatedAt: "2026-05-23T09:14:00.000Z",
+      body: `---
+kind: incident
+projects: [ISO20022]
+tags: [incident, pacs]
+---
+
+# Contexte
+
+Erreur reçue pendant le traitement PACS.002.
+
+# Notes
+
+- Tel à Pierre, en attente de son document.
+- Mail envoyé à Jean.
+- Décision : garder le contournement actuel.
+
+# Actions
+
+- [ ] Relancer Pierre pour document +ISO20022 @mail
+`,
+    },
+    {
+      id: "journal-daniel",
+      title: "2026-05-23 - Discussion avec Daniel",
+      date: "2026-05-23",
+      kind: "meeting",
+      projects: [],
+      tags: ["discussion"],
+      createdAt: "2026-05-23T10:35:00.000Z",
+      updatedAt: "2026-05-23T10:35:00.000Z",
+      body: `---
+kind: meeting
+projects: []
+tags: [discussion]
+---
+
+# Notes
+
+- Point rapide à ranger plus tard.
+`,
+    },
+  ],
+};
+
+// src/todos/parser.js
+const priorityPattern = /^\(([A-Z])\)\s+/;
+const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+const projectPattern = /^\+[A-Za-z0-9À-ÿ_.-]+$/;
+const contextPattern = /^@[A-Za-z0-9À-ÿ_.-]+$/;
+const keyValuePattern = /^[A-Za-z][A-Za-z0-9_-]*:[^\s]+$/;
+function parseTodo(raw) {
+  const source = raw.trim();
+  const completed = source.startsWith("x ");
+  const activeSource = completed ? source.slice(2).trim() : source;
+  const completedTokens = activeSource.split(/\s+/).filter(Boolean);
+  const completionDate = completed && isoDatePattern.test(completedTokens[0]) ? completedTokens.shift() : null;
+  const afterCompletionDate = completedTokens.join(" ");
+  const priorityMatch = afterCompletionDate.match(priorityPattern);
+  const priority = priorityMatch ? priorityMatch[1] : null;
+  const withoutPriority = priorityMatch ? afterCompletionDate.slice(priorityMatch[0].length) : afterCompletionDate;
+  const tokens = withoutPriority.split(/\s+/).filter(Boolean);
+  const createdDate = isoDatePattern.test(tokens[0]) ? tokens.shift() : null;
+  const projects = [];
+  const contexts = [];
+  const values = {};
+  const textParts = [];
+
+  for (const token of tokens) {
+    if (projectPattern.test(token)) {
+      projects.push(token.slice(1));
+    } else if (contextPattern.test(token)) {
+      contexts.push(token.slice(1));
+    } else if (keyValuePattern.test(token)) {
+      const separatorIndex = token.indexOf(":");
+      values[token.slice(0, separatorIndex)] = token.slice(separatorIndex + 1);
+    } else {
+      textParts.push(token);
+    }
+  }
+
+  return {
+    raw: source,
+    completed,
+    completionDate,
+    priority,
+    text: textParts.join(" "),
+    projects,
+    contexts,
+    values,
+    createdDate,
+    dueDate: values.due || null,
+    followupDate: values.followup || null,
+    status: values.status || (values.waiting ? "waiting" : null),
+    id: values.id || null,
+  };
+}
+function serializeTodoFromRaw(raw) {
+  return parseTodo(raw).raw;
+}
+function addProjectToRaw(raw, projectName) {
+  const projectToken = `+${projectName}`;
+  if (raw.split(/\s+/).includes(projectToken)) {
+    return raw;
+  }
+
+  return `${raw.trim()} ${projectToken}`;
+}
+
+// src/todos/renderer.js
+function escapeTodoHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function tokenMeta(token) {
+  if (/^\([A-Z]\)$/.test(token)) return "tok-priority";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(token)) return "tok-created is-passive";
+  if (/^\+/.test(token)) return "tok-project";
+  if (/^@/.test(token)) return "tok-context";
+  if (/^id:/.test(token)) return "tok-id";
+  if (/^due:/.test(token)) return "tok-due";
+  if (/^status:/.test(token) || /^waiting:/.test(token)) return "tok-status";
+  if (/^[A-Za-z][A-Za-z0-9_-]*:[^\s]+$/.test(token)) return "tok-key";
+  return "";
+}
+
+function tokenType(token) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(token)) return "created";
+  if (/^\+/.test(token)) return "project";
+  if (/^@/.test(token)) return "context";
+  if (/^id:/.test(token)) return "id";
+  if (/^due:/.test(token)) return "due";
+  if (/^status:/.test(token)) return "status";
+  if (/^waiting:/.test(token)) return "waiting";
+  if (/^[A-Za-z][A-Za-z0-9_-]*:[^\s]+$/.test(token)) return "key";
+  return "";
+}
+
+function tokenIsVisible(token, visibleTokens = {}) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(token)) return visibleTokens.created !== false;
+  if (/^\+/.test(token)) return visibleTokens.project !== false;
+  if (/^@/.test(token)) return visibleTokens.context !== false;
+  if (/^id:/.test(token)) return visibleTokens.id !== false;
+  if (/^due:/.test(token)) return visibleTokens.due !== false;
+  return true;
+}
+function renderTodoTokens(raw, options = {}) {
+  return raw
+    .trim()
+    .split(/\s+/)
+    .filter((token) => tokenIsVisible(token, options.visibleTokens))
+    .map((token) => {
+      const klass = tokenMeta(token);
+      const escaped = escapeTodoHtml(token);
+      const type = tokenType(token);
+      const value = type === "created" ? token : token.includes(":") ? token.slice(token.indexOf(":") + 1) : token.slice(1);
+      if (type === "created") return `<span class="${klass}">${escaped}</span>`;
+      return klass ? `<span class="${klass}" data-token-type="${type}" data-token-value="${escapeTodoHtml(value)}">${escaped}</span>` : escaped;
+    })
+    .join(" ");
+}
+function createTodoRow(todo, options = {}) {
+  const row = document.createElement("div");
+  row.className = `todo-row${todo.parsed?.completed ? " is-completed" : ""}${todo.duplicateTodoId ? " has-duplicate-id" : ""}${todo.isOverdue ? " is-overdue" : ""}`;
+  row.draggable = options.dragHandle !== false;
+  row.tabIndex = 0;
+  row.dataset.todoId = todo.id;
+  if (todo.duplicateTodoId) row.title = `ID todo duplique: ${todo.parsed.id}`;
+
+  const marker = document.createElement("span");
+  marker.className = "box";
+  marker.title = options.dragHandle ? "Marquer terminé. Glisser la ligne pour lier." : "Marquer terminé";
+
+  const main = document.createElement("span");
+  main.className = "todo-main";
+
+  const text = document.createElement("span");
+  text.className = "todo-text editable";
+  text.innerHTML = renderTodoTokens(todo.raw, options);
+  text.title = "Cliquer pour éditer";
+
+  if (todo.isOverdue) {
+    const overdue = document.createElement("span");
+    overdue.className = "todo-overdue";
+    overdue.textContent = `En retard ${todo.parsed.dueDate}`;
+    main.append(overdue);
+  }
+
+  const deleteButton = document.createElement("span");
+  deleteButton.className = "todo-delete";
+  deleteButton.title = "Supprimer";
+  deleteButton.textContent = "×";
+
+  main.prepend(text);
+  row.append(marker, main, deleteButton);
+  return row;
+}
+
+// src/app.js
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function escapeAppHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const value = textarea.value;
+  textarea.value = `${value.slice(0, start)}${text}${value.slice(end)}`;
+  textarea.selectionStart = start + text.length;
+  textarea.selectionEnd = start + text.length;
+  textarea.focus();
+}
+
+function defaultTodoVisibleTokens() {
+  return {
+    id: true,
+    created: true,
+    due: true,
+    project: true,
+    context: true,
+  };
+}
+
+function isIsoDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+async function createApp() {
+  const savedState = await loadAppState();
+  let state = savedState
+    ? normalizeSavedState(savedState)
+    : stampSchema({ ...clone(seedState), config: clone(defaultConfig) });
+
+  let selectedProjectId = state.projects[0]?.id || null;
+  let selectedJournalId = state.journal?.[0]?.id || null;
+  let activeFilter = "Tous";
+  let activeView = "home";
+  let todoMode = "open";
+  let calendarDate = new Date();
+  let selectedCalendarDate = todayISO(calendarDate);
+  let journalOverTypeEditor = null;
+  let journalOverTypeNoteId = null;
+  let journalOverTypeLoading = false;
+  const editorModes = {
+    projectHome: "split",
+    project: "split",
+  };
+
+  const elements = {
+    captureInput: byId("captureInput"),
+    addTodoButton: byId("addTodoButton"),
+    insertDateButton: byId("insertDateButton"),
+    insertProjectDateButton: byId("insertProjectDateButton"),
+    importButton: byId("importButton"),
+    importFileInput: byId("importFileInput"),
+    exportButton: byId("exportButton"),
+    snapshotsButton: byId("snapshotsButton"),
+    snapshotPanel: byId("snapshotPanel"),
+    snapshotList: byId("snapshotList"),
+    closeSnapshotsButton: byId("closeSnapshotsButton"),
+    searchInput: byId("searchInput"),
+    searchPanel: byId("searchPanel"),
+    toggleNavButton: byId("toggleNavButton"),
+    toggleContextButton: byId("toggleContextButton"),
+    resizeNavHandle: byId("resizeNavHandle"),
+    resizeContextHandle: byId("resizeContextHandle"),
+    filterChips: byId("filterChips"),
+    inboxTodos: byId("inboxTodos"),
+    followupTodos: byId("followupTodos"),
+    priorityTodos: byId("priorityTodos"),
+    projectList: byId("projectList"),
+    projectTitle: byId("projectTitle"),
+    projectBody: byId("projectBody"),
+    projectEditorGrid: byId("projectEditorGrid"),
+    projectPreview: byId("projectPreview"),
+    triageList: byId("triageList"),
+    autoIdToggle: byId("autoIdToggle"),
+    dateFormatSelect: byId("dateFormatSelect"),
+    staleDaysInput: byId("staleDaysInput"),
+    configPreview: byId("configPreview"),
+    todoViewSearch: byId("todoViewSearch"),
+    todoViewProjectFilter: byId("todoViewProjectFilter"),
+    todoViewContextFilter: byId("todoViewContextFilter"),
+    todoSortSelect: byId("todoSortSelect"),
+    todoShowId: byId("todoShowId"),
+    todoShowCreated: byId("todoShowCreated"),
+    todoShowDue: byId("todoShowDue"),
+    todoShowProject: byId("todoShowProject"),
+    todoShowContext: byId("todoShowContext"),
+    todoViewList: byId("todoViewList"),
+    todoRawEditor: byId("todoRawEditor"),
+    projectFocusCount: byId("projectFocusCount"),
+    projectFocusList: byId("projectFocusList"),
+    projectFocusTitle: byId("projectFocusTitle"),
+    projectFocusBody: byId("projectFocusBody"),
+    projectFocusEditorGrid: byId("projectFocusEditorGrid"),
+    projectFocusPreview: byId("projectFocusPreview"),
+    projectLinkedTodos: byId("projectLinkedTodos"),
+    projectNewJournalButton: byId("projectNewJournalButton"),
+    newProjectButton: byId("newProjectButton"),
+    archiveProjectButton: byId("archiveProjectButton"),
+    deleteProjectButton: byId("deleteProjectButton"),
+    newJournalButton: byId("newJournalButton"),
+    deleteJournalButton: byId("deleteJournalButton"),
+    journalKindFilter: byId("journalKindFilter"),
+    journalList: byId("journalList"),
+    journalTitle: byId("journalTitle"),
+    insertJournalDateButton: byId("insertJournalDateButton"),
+    journalTodoFromSelectionButton: byId("journalTodoFromSelectionButton"),
+    journalExtractTasksButton: byId("journalExtractTasksButton"),
+    journalAppendProjectButton: byId("journalAppendProjectButton"),
+    journalEditorHost: byId("journalEditorHost"),
+    journalBody: byId("journalBody"),
+    journalLinks: byId("journalLinks"),
+    calendarPrevButton: byId("calendarPrevButton"),
+    calendarTodayButton: byId("calendarTodayButton"),
+    calendarNextButton: byId("calendarNextButton"),
+    calendarMonthLabel: byId("calendarMonthLabel"),
+    calendarDays: byId("calendarDays"),
+    calendarSelectedLabel: byId("calendarSelectedLabel"),
+    calendarDayDetails: byId("calendarDayDetails"),
+  };
+
+  function persist() {
+    state = stampSchema(state);
+    return saveAppState(state);
+  }
+
+  function todoVisibleTokens() {
+    if (!state.config.todo.visibleTokens) {
+      state.config.todo.visibleTokens = clone(defaultConfig.todo.visibleTokens || defaultTodoVisibleTokens());
+    }
+    return state.config.todo.visibleTokens;
+  }
+
+  function normalizeSavedState(savedState) {
+    return normalizeTodoIds(migrateStateSchema({
+      ...clone(seedState),
+      ...savedState,
+      config: mergeConfig(savedState.config),
+    }));
+  }
+
+  function normalizeImportedState(importedState) {
+    const validation = validateImportPayload(importedState);
+    if (!validation.ok) {
+      throw new Error(validation.errors.join("\n"));
+    }
+    const sourceState = validation.state;
+    const normalized = normalizeTodoIds(migrateStateSchema({
+      ...clone(seedState),
+      ...sourceState,
+      todos: Array.isArray(sourceState.todos) ? sourceState.todos : [],
+      projects: Array.isArray(sourceState.projects) ? sourceState.projects : [],
+      journal: Array.isArray(sourceState.journal) ? sourceState.journal : [],
+      config: mergeConfig(sourceState.config),
+    }));
+    const existing = new Set(normalized.projects.map((project) => project.title.toLowerCase()));
+    const missing = [];
+    for (const todo of normalized.todos) {
+      for (const project of parseTodo(todo.raw).projects) {
+        if (!existing.has(project.toLowerCase())) {
+          missing.push(project);
+          existing.add(project.toLowerCase());
+        }
+      }
+    }
+    for (const name of missing) {
+      normalized.projects.unshift(createProjectRecord(name, { source: "import" }));
+    }
+    return normalized;
+  }
+
+  function normalizeTodoIds(sourceState) {
+    return {
+      ...sourceState,
+      todos: sourceState.todos.map((todo, index) => {
+        const parsed = parseTodo(todo.raw);
+        return {
+          ...todo,
+          id: parsed.id || todo.id || `todo-${Date.now()}-${index}`,
+        };
+      }),
+    };
+  }
+
+  function normalizeTodoCreationDates() {
+    let changed = false;
+    for (const todo of state.todos) {
+      const nextRaw = ensureTodoCreatedDate(todo.raw);
+      if (nextRaw !== todo.raw) {
+        todo.raw = nextRaw;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  function parsedTodos() {
+    const todos = state.todos.map((todo) => ({ ...todo, parsed: parseTodo(todo.raw) }));
+    const todoIdCounts = todos.reduce((counts, todo) => {
+      if (todo.parsed.id) counts[todo.parsed.id] = (counts[todo.parsed.id] || 0) + 1;
+      return counts;
+    }, {});
+    const today = todayISO();
+    return todos.map((todo) => ({
+      ...todo,
+      duplicateTodoId: Boolean(todo.parsed.id && todoIdCounts[todo.parsed.id] > 1),
+      isOverdue: Boolean(todo.parsed.dueDate && todo.parsed.dueDate < today && !todo.parsed.completed),
+    }));
+  }
+
+  function selectedProject() {
+    return visibleProjects().find((project) => project.id === selectedProjectId) || visibleProjects()[0];
+  }
+
+  function visibleProjects() {
+    return state.projects.filter((project) => !project.archivedAt && project.status !== "archived");
+  }
+
+  function projectTodos(projectTitle) {
+    return parsedTodos().filter((todo) => todo.parsed.projects.includes(projectTitle));
+  }
+
+  function createProjectRecord(title, options = {}) {
+    const projectTitle = title.trim().replace(/\s+/g, "");
+    const now = new Date().toISOString();
+    return {
+      id: crypto.randomUUID ? crypto.randomUUID() : `project-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      title: projectTitle,
+      status: options.status || "active",
+      kind: options.kind || "projet",
+      tags: options.tags || [],
+      summary: options.summary || "Projet créé automatiquement depuis une capture.",
+      updatedAt: now,
+      body: options.body || `---\ntype: project\nstatus: active\ntags: []\n---\n\n# Contexte\n\nProjet créé automatiquement depuis une capture.\n\n# Avancement\n\n## ${formatDate(new Date(), state.config.dateInsert)}\n\n- Créé depuis ${options.source || "Worklog"}.\n\n# Questions ouvertes\n\n# Décisions\n`,
+    };
+  }
+
+  function ensureProjectsFromNames(projectNames, source = "capture") {
+    const existing = new Set(state.projects.map((project) => project.title.toLowerCase()));
+    const created = [];
+
+    for (const name of unique(projectNames)) {
+      const normalized = name.trim().replace(/\s+/g, "");
+      if (!normalized || existing.has(normalized.toLowerCase())) continue;
+      const project = createProjectRecord(normalized, { source });
+      state.projects.unshift(project);
+      existing.add(project.title.toLowerCase());
+      created.push(project);
+    }
+
+    return created;
+  }
+
+  function ensureProjectsFromTodoRaw(raw, source = "todo") {
+    return ensureProjectsFromNames(parseTodo(raw).projects, source);
+  }
+
+  function selectedJournal() {
+    return state.journal.find((note) => note.id === selectedJournalId) || state.journal[0];
+  }
+
+  function noteProjects(note) {
+    const frontmatter = parseFrontmatter(note.body);
+    return readArrayValue(frontmatter.data.projects);
+  }
+
+  function projectNotes(projectTitle) {
+    return state.journal.filter((note) => noteProjects(note).includes(projectTitle));
+  }
+
+  function syncProjectFromMarkdown(project) {
+    const frontmatter = parseFrontmatter(project.body);
+    project.status = frontmatter.data.status || project.status || "active";
+    project.kind = frontmatter.data.kind || frontmatter.data.type || project.kind || "projet";
+    project.tags = readArrayValue(frontmatter.data.tags);
+    project.summary = frontmatter.data.summary || project.summary || "";
+  }
+
+  function syncJournalFromMarkdown(note) {
+    const frontmatter = parseFrontmatter(note.body);
+    note.kind = frontmatter.data.kind || frontmatter.data.type || "note";
+    note.projects = readArrayValue(frontmatter.data.projects);
+    note.tags = readArrayValue(frontmatter.data.tags);
+    if (frontmatter.data.date) note.date = frontmatter.data.date;
+  }
+
+  function saveJournalMarkdown(note, markdown) {
+    note.body = markdown;
+    note.updatedAt = new Date().toISOString();
+    syncJournalFromMarkdown(note);
+    ensureProjectsFromNames(note.projects, "journal");
+    persist();
+  }
+
+  async function mountJournalOverTypeEditor() {
+    const note = selectedJournal();
+    if (!note || journalOverTypeLoading) return;
+
+    if (journalOverTypeEditor) {
+      if (journalOverTypeNoteId !== note.id) {
+        journalOverTypeEditor.setMarkdown(note.body);
+        journalOverTypeNoteId = note.id;
+      }
+      return;
+    }
+
+    journalOverTypeLoading = true;
+    try {
+      journalOverTypeEditor = await createOverTypeEditor({
+        host: elements.journalEditorHost,
+        markdown: note.body,
+        onChange: (markdown) => {
+          const current = selectedJournal();
+          if (!current || current.id !== journalOverTypeNoteId) return;
+          elements.journalBody.value = markdown;
+          saveJournalMarkdown(current, markdown);
+        },
+      });
+      journalOverTypeNoteId = note.id;
+    } catch (error) {
+      console.error("OverType indisponible", error);
+      elements.journalEditorHost.textContent = "";
+      elements.journalBody.classList.remove("hidden");
+      alert(`OverType indisponible.\n\n${error.message || error}`);
+    } finally {
+      journalOverTypeLoading = false;
+    }
+  }
+
+  function itemsForDate(dateIso) {
+    const notes = state.journal.filter((note) => note.date === dateIso || note.title.startsWith(dateIso));
+    const todos = parsedTodos().filter((todo) => [todo.parsed.dueDate, todo.parsed.followupDate].includes(dateIso));
+    return { notes, todos };
+  }
+
+  function monthLabel(date) {
+    return date.toLocaleDateString("fr-CH", { month: "long", year: "numeric" });
+  }
+
+  function buildSearchResults(query) {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return [];
+    const results = [];
+
+    for (const todo of parsedTodos()) {
+      if (todo.raw.toLowerCase().includes(q)) {
+        results.push({
+          type: "todo",
+          id: todo.id,
+          title: todo.raw,
+          excerpt: "Todo.txt",
+        });
+      }
+    }
+
+    for (const project of visibleProjects()) {
+      const haystack = `${project.title} ${project.kind} ${project.status} ${project.tags.join(" ")} ${project.body}`.toLowerCase();
+      if (haystack.includes(q)) {
+        results.push({
+          type: "project",
+          id: project.id,
+          title: project.title,
+          excerpt: project.summary || project.kind,
+        });
+      }
+    }
+
+    for (const note of state.journal) {
+      const haystack = `${note.title} ${note.kind} ${(note.tags || []).join(" ")} ${note.body}`.toLowerCase();
+      if (haystack.includes(q)) {
+        results.push({
+          type: "journal",
+          id: note.id,
+          title: note.title,
+          excerpt: note.kind,
+        });
+      }
+    }
+
+    return results.slice(0, 20);
+  }
+
+  function todoMatchesFilter(todo) {
+    if (activeFilter === "Tous") return true;
+    if (activeFilter.startsWith("+")) return todo.parsed.projects.includes(activeFilter.slice(1));
+    if (activeFilter.startsWith("@")) return todo.parsed.contexts.includes(activeFilter.slice(1));
+    if (activeFilter.endsWith(":")) return Boolean(todo.parsed.values[activeFilter.slice(0, -1)]);
+    return true;
+  }
+
+  function currentTodos() {
+    return parsedTodos().filter(todoMatchesFilter);
+  }
+
+  function setText(id, value) {
+    const element = byId(id);
+    if (element) element.textContent = value;
+  }
+
+  function renderEmpty(container, label) {
+    container.innerHTML = "";
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = label;
+    container.append(empty);
+  }
+
+  function updateCounts() {
+    const todos = parsedTodos();
+    const openTodos = todos.filter((todo) => !todo.parsed.completed);
+    const inbox = openTodos.filter((todo) => !todo.parsed.projects.length);
+    const followups = openTodos.filter((todo) => todo.parsed.followupDate);
+    const priorities = openTodos.filter((todo) => todo.parsed.priority === "A");
+    const projects = visibleProjects();
+    const dormant = projects.filter((project) => daysBetween(project.updatedAt) > state.config.staleAfterDays);
+
+    setText("todoCount", openTodos.length);
+    setText("inboxNavCount", inbox.length);
+    setText("followupNavCount", followups.length);
+    setText("todayNavCount", openTodos.filter((todo) => [todo.parsed.dueDate, todo.parsed.followupDate].includes(todayISO())).length);
+    setText("priorityNavCount", priorities.length);
+    setText("projectCount", projects.length);
+    setText("journalCount", state.journal.length);
+    setText("openProjectsCount", projects.length);
+    setText("metricProjects", projects.length);
+    setText("metricTodos", openTodos.length);
+    setText("metricInbox", `${inbox.length} dans inbox`);
+    setText("metricFollowups", followups.length);
+    setText("metricDormant", dormant.length);
+    setText("inboxCount", inbox.length);
+    setText("followupCount", followups.length);
+    setText("priorityCount", priorities.length);
+    setText("triageCount", inbox.length);
+  }
+
+  function renderTodoGroup(container, todos, emptyLabel, options = {}) {
+    container.innerHTML = "";
+    if (!todos.length) {
+      renderEmpty(container, emptyLabel);
+      return;
+    }
+
+    for (const todo of todos) {
+      const row = createTodoRow(todo, options);
+      row.addEventListener("click", (event) => {
+        if (event.target.closest(".todo-delete")) {
+          deleteTodo(todo.id);
+          return;
+        }
+        const token = event.target.closest("[data-token-type]");
+        if (token) {
+          applyTodoTokenFilter(token.dataset.tokenType, token.dataset.tokenValue);
+          return;
+        }
+        if (event.target.closest(".todo-text")) {
+          startInlineEdit(row, todo.id);
+          return;
+        }
+        if (event.target.closest(".box")) {
+          toggleTodo(todo.id);
+        }
+      });
+      row.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", todo.id);
+      });
+      row.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        row.classList.add("is-drag-over");
+      });
+      row.addEventListener("dragleave", () => row.classList.remove("is-drag-over"));
+      row.addEventListener("drop", (event) => {
+        event.preventDefault();
+        row.classList.remove("is-drag-over");
+        reorderTodo(event.dataTransfer.getData("text/plain"), todo.id);
+      });
+      container.append(row);
+    }
+  }
+
+  function renderTodos() {
+    const todos = currentTodos().filter((todo) => !todo.parsed.completed);
+    const inbox = todos.filter((todo) => !todo.parsed.projects.length);
+    const followups = todos.filter((todo) => todo.parsed.followupDate || todo.parsed.values.waiting);
+    const priorities = todos.filter((todo) => todo.parsed.priority === "A");
+
+    const displayOptions = { visibleTokens: todoVisibleTokens() };
+    renderTodoGroup(elements.inboxTodos, inbox, "Rien à ranger pour le moment.", { ...displayOptions, dragHandle: true });
+    renderTodoGroup(elements.followupTodos, followups, "Aucune relance dans ce filtre.", displayOptions);
+    renderTodoGroup(elements.priorityTodos, priorities, "Aucune priorité A.", displayOptions);
+  }
+
+  function renderFilters() {
+    const todos = parsedTodos();
+    const tokens = unique([
+      "Tous",
+      ...todos.flatMap((todo) => todo.parsed.projects.map((project) => `+${project}`)),
+      ...todos.flatMap((todo) => todo.parsed.contexts.map((context) => `@${context}`)),
+      ...todos.flatMap((todo) => Object.keys(todo.parsed.values).filter((key) => key !== "id").map((key) => `${key}:`)),
+    ]);
+
+    elements.filterChips.innerHTML = "";
+    for (const token of tokens) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = `filter-chip${token === activeFilter ? " active" : ""}`;
+      chip.textContent = token;
+      chip.addEventListener("click", () => {
+        activeFilter = token;
+        render();
+      });
+      elements.filterChips.append(chip);
+    }
+  }
+
+  function renderProjects() {
+    elements.projectList.innerHTML = "";
+    for (const project of visibleProjects()) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `project-card${project.id === selectedProjectId ? " active" : ""}`;
+      card.dataset.projectTitle = project.title;
+      card.innerHTML = `
+        <span class="card-top">
+          <span class="project-title">${project.title}</span>
+          <span class="age">${daysBetween(project.updatedAt)} j</span>
+        </span>
+        <span class="summary">${project.summary}</span>
+        <span class="chips">
+          <span class="chip ${project.status === "waiting" ? "amber" : project.status === "dormant" ? "violet" : "green"}">${project.status}</span>
+          <span class="chip blue">${project.kind}</span>
+          <span class="chip">${projectTodos(project.title).length} todos</span>
+        </span>
+      `;
+      card.addEventListener("click", () => {
+        selectedProjectId = project.id;
+        render();
+      });
+      card.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        card.classList.add("drop-target");
+      });
+      card.addEventListener("dragleave", () => card.classList.remove("drop-target"));
+      card.addEventListener("drop", (event) => {
+        event.preventDefault();
+        card.classList.remove("drop-target");
+        linkTodoToProject(event.dataTransfer.getData("text/plain"), project.title);
+      });
+      elements.projectList.append(card);
+    }
+  }
+
+  function renderProjectEditor() {
+    const project = selectedProject();
+    if (!project) return;
+    elements.projectTitle.value = project.title;
+    elements.projectBody.value = project.body;
+    elements.projectPreview.innerHTML = markdownToHtml(project.body);
+    setText("selectedProjectName", `Projet ${project.title}`);
+    setText("selectedProjectTodos", `${projectTodos(project.title).length} ouverts`);
+    setText("selectedProjectActivity", `${daysBetween(project.updatedAt)} jour(s)`);
+  }
+
+  function renderTriage() {
+    const inbox = parsedTodos().filter((todo) => !todo.parsed.completed && !todo.parsed.projects.length);
+    elements.triageList.innerHTML = "";
+    if (!inbox.length) {
+      renderEmpty(elements.triageList, "Tout est lié à un projet.");
+      return;
+    }
+    for (const todo of inbox.slice(0, 4)) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "inbox-row";
+      row.innerHTML = `<span class="row-title">${todo.parsed.text}</span><span class="row-meta">id:${todo.parsed.id || todo.id}</span>`;
+      elements.triageList.append(row);
+    }
+  }
+
+  function renderConfig() {
+    elements.autoIdToggle.checked = state.config.todo.autoId;
+    elements.dateFormatSelect.value = state.config.dateInsert;
+    elements.staleDaysInput.value = state.config.staleAfterDays;
+    elements.configPreview.textContent = JSON.stringify(state.config, null, 2);
+  }
+
+  function editorGridFor(scope) {
+    return {
+      projectHome: elements.projectEditorGrid,
+      project: elements.projectFocusEditorGrid,
+    }[scope];
+  }
+
+  function setEditorMode(scope, mode) {
+    editorModes[scope] = mode;
+    const grid = editorGridFor(scope);
+    if (!grid) return;
+    grid.classList.toggle("editor-mode-write", mode === "write");
+    grid.classList.toggle("editor-mode-preview", mode === "preview");
+    document.querySelectorAll(`[data-editor-mode-button^="${scope}:"]`).forEach((button) => {
+      button.classList.toggle("active", button.dataset.editorModeButton === `${scope}:${mode}`);
+    });
+  }
+
+  function renderEditorModes() {
+    for (const [scope, mode] of Object.entries(editorModes)) {
+      setEditorMode(scope, mode);
+    }
+  }
+
+  function renderSnapshots() {
+    const snapshots = loadSnapshots();
+    elements.snapshotList.innerHTML = "";
+
+    if (!snapshots.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-note";
+      empty.textContent = "Aucun snapshot pour le moment.";
+      elements.snapshotList.append(empty);
+      return;
+    }
+
+    for (const snapshot of snapshots) {
+      const row = document.createElement("div");
+      row.className = "snapshot-row";
+
+      const content = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "snapshot-title";
+      title.textContent = snapshot.label;
+      const meta = document.createElement("div");
+      meta.className = "snapshot-meta";
+      const counts = snapshot.counts || {};
+      meta.textContent = `${new Date(snapshot.createdAt).toLocaleString("fr-CH")} - ${counts.todos || 0} todos, ${counts.projects || 0} projets, ${counts.journal || 0} notes`;
+      content.append(title, meta);
+
+      const actions = document.createElement("div");
+      actions.className = "snapshot-actions";
+      const restore = document.createElement("button");
+      restore.className = "button primary";
+      restore.textContent = "Restaurer";
+      restore.addEventListener("click", async () => {
+        if (!confirm(`Restaurer le snapshot "${snapshot.label}" ?\n\nUn snapshot de l'etat actuel sera cree avant restauration.`)) return;
+        saveSnapshot("Avant restauration snapshot", state);
+        state = normalizeImportedState(snapshot.state);
+        selectedProjectId = visibleProjects()[0]?.id || state.projects[0]?.id || null;
+        selectedJournalId = state.journal[0]?.id || null;
+        activeFilter = "Tous";
+        await persist();
+        elements.snapshotPanel.classList.add("hidden");
+        render();
+      });
+
+      const download = document.createElement("button");
+      download.className = "button";
+      download.textContent = "Télécharger";
+      download.addEventListener("click", () => exportSnapshot(snapshot));
+
+      const remove = document.createElement("button");
+      remove.className = "button";
+      remove.textContent = "Supprimer";
+      remove.addEventListener("click", () => {
+        deleteSnapshot(snapshot.id);
+        renderSnapshots();
+      });
+
+      actions.append(restore, download, remove);
+      row.append(content, actions);
+      elements.snapshotList.append(row);
+    }
+  }
+
+  function renderLayoutState() {
+    const contextAutoHidden = true;
+    document.body.style.setProperty("--nav-width", `${state.config.layout.navCollapsed ? 42 : state.config.layout.navWidth}px`);
+    document.body.style.setProperty("--context-width", `${contextAutoHidden ? 0 : state.config.layout.contextCollapsed ? 42 : state.config.layout.contextWidth}px`);
+    document.body.classList.toggle("is-nav-collapsed", state.config.layout.navCollapsed);
+    document.body.classList.toggle("is-context-collapsed", state.config.layout.contextCollapsed);
+    document.body.classList.toggle("is-context-auto-hidden", contextAutoHidden);
+    document.body.classList.toggle("is-context-disabled", true);
+    elements.toggleNavButton.textContent = state.config.layout.navCollapsed ? "›" : "‹";
+    elements.toggleContextButton.textContent = state.config.layout.contextCollapsed ? "‹" : "›";
+    elements.toggleNavButton.title = state.config.layout.navCollapsed ? "Afficher navigation" : "Réduire navigation";
+    elements.toggleContextButton.title = state.config.layout.contextCollapsed ? "Afficher contexte" : "Réduire contexte";
+  }
+
+  function renderTodoSelectFilters() {
+    const todos = parsedTodos();
+    const projects = unique(todos.flatMap((todo) => todo.parsed.projects)).sort();
+    const contexts = unique(todos.flatMap((todo) => todo.parsed.contexts)).sort();
+    const selectedProjectFilter = elements.todoViewProjectFilter.value;
+    const selectedContextFilter = elements.todoViewContextFilter.value;
+
+    elements.todoViewProjectFilter.innerHTML = '<option value="">Tous les projets</option>';
+    for (const project of projects) {
+      const option = document.createElement("option");
+      option.value = project;
+      option.textContent = `+${project}`;
+      elements.todoViewProjectFilter.append(option);
+    }
+    elements.todoViewProjectFilter.value = projects.includes(selectedProjectFilter) ? selectedProjectFilter : "";
+
+    elements.todoViewContextFilter.innerHTML = '<option value="">Tous les contextes</option>';
+    for (const context of contexts) {
+      const option = document.createElement("option");
+      option.value = context;
+      option.textContent = `@${context}`;
+      elements.todoViewContextFilter.append(option);
+    }
+    elements.todoViewContextFilter.value = contexts.includes(selectedContextFilter) ? selectedContextFilter : "";
+  }
+
+  function renderTodoDisplayOptions() {
+    elements.todoSortSelect.value = state.config.todo.sortMode || "file";
+    const visibleTokens = todoVisibleTokens();
+    elements.todoShowId.checked = visibleTokens.id !== false;
+    elements.todoShowCreated.checked = visibleTokens.created !== false;
+    elements.todoShowDue.checked = visibleTokens.due !== false;
+    elements.todoShowProject.checked = visibleTokens.project !== false;
+    elements.todoShowContext.checked = visibleTokens.context !== false;
+  }
+
+  function priorityRank(priority) {
+    if (!priority) return 99;
+    return priority.charCodeAt(0) - "A".charCodeAt(0);
+  }
+
+  function sortTodos(todos) {
+    const mode = state.config.todo.sortMode || "file";
+    if (mode === "due") {
+      return [...todos].sort((a, b) => {
+        const dueA = a.parsed.dueDate || "9999-12-31";
+        const dueB = b.parsed.dueDate || "9999-12-31";
+        return dueA.localeCompare(dueB) || priorityRank(a.parsed.priority) - priorityRank(b.parsed.priority);
+      });
+    }
+    if (mode === "priority") {
+      return [...todos].sort((a, b) => {
+        return priorityRank(a.parsed.priority) - priorityRank(b.parsed.priority)
+          || (a.parsed.dueDate || "9999-12-31").localeCompare(b.parsed.dueDate || "9999-12-31");
+      });
+    }
+    return todos;
+  }
+
+  function renderTodoView() {
+    renderTodoSelectFilters();
+    renderTodoDisplayOptions();
+    const query = elements.todoViewSearch.value.trim().toLowerCase();
+    const project = elements.todoViewProjectFilter.value;
+    const context = elements.todoViewContextFilter.value;
+    let todos = parsedTodos().filter((todo) => {
+      if (todoMode === "open" && todo.parsed.completed) return false;
+      if (todoMode === "done" && !todo.parsed.completed) return false;
+      if (project && !todo.parsed.projects.includes(project)) return false;
+      if (context && !todo.parsed.contexts.includes(context)) return false;
+      if (query && !todo.raw.toLowerCase().includes(query)) return false;
+      return true;
+    });
+    todos = sortTodos(todos);
+
+    elements.todoRawEditor.classList.toggle("hidden", todoMode !== "raw");
+    elements.todoViewList.classList.toggle("hidden", todoMode === "raw");
+
+    if (todoMode === "raw") {
+      elements.todoRawEditor.value = state.todos.map((todo) => todo.raw).join("\n");
+      return;
+    }
+
+    renderTodoGroup(elements.todoViewList, todos, "Aucune tâche dans cette vue.", {
+      dragHandle: state.config.todo.sortMode === "file",
+      visibleTokens: todoVisibleTokens(),
+    });
+  }
+
+  function renderProjectFocus() {
+    const project = selectedProject();
+    if (!project) return;
+
+    const projects = visibleProjects();
+    elements.projectFocusCount.textContent = projects.length;
+    elements.projectFocusList.innerHTML = "";
+    for (const item of projects) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `project-card${item.id === selectedProjectId ? " active" : ""}`;
+      card.innerHTML = `
+        <span class="card-top">
+          <span class="project-title">${item.title}</span>
+          <span class="age">${daysBetween(item.updatedAt)} j</span>
+        </span>
+        <span class="chips">
+          <span class="chip ${item.status === "waiting" ? "amber" : item.status === "dormant" ? "violet" : "green"}">${item.status}</span>
+          <span class="chip">${projectTodos(item.title).length} todos</span>
+        </span>
+      `;
+      card.addEventListener("click", () => {
+        selectedProjectId = item.id;
+        render();
+      });
+      elements.projectFocusList.append(card);
+    }
+
+    elements.projectFocusTitle.value = project.title;
+    elements.projectFocusBody.value = project.body;
+    elements.projectFocusPreview.innerHTML = markdownToHtml(project.body);
+    renderTodoGroup(
+      elements.projectLinkedTodos,
+      projectTodos(project.title).filter((todo) => !todo.parsed.completed),
+      "Aucune action liée à ce projet.",
+      { dragHandle: true, visibleTokens: todoVisibleTokens() },
+    );
+    const notes = projectNotes(project.title);
+    if (notes.length) {
+      for (const note of notes.slice(0, 4)) {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "journal-row";
+        row.innerHTML = `<span class="row-title">${note.title}</span><span class="row-meta">${note.kind}</span>`;
+        row.addEventListener("click", () => {
+          selectedJournalId = note.id;
+          activeView = "journal";
+          render();
+        });
+        elements.projectLinkedTodos.append(row);
+      }
+    }
+  }
+
+  function renderJournalView() {
+    const kindFilter = elements.journalKindFilter.value;
+    const notes = state.journal
+      .filter((note) => !kindFilter || note.kind === kindFilter)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    elements.journalList.innerHTML = "";
+
+    for (const note of notes) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `journal-card${note.id === selectedJournalId ? " active" : ""}`;
+      card.innerHTML = `
+        <span class="card-top">
+          <span class="project-title">${note.title}</span>
+          <span class="age">${note.kind}</span>
+        </span>
+        <span class="chips">
+          ${noteProjects(note).map((project) => `<span class="chip blue">${project}</span>`).join("")}
+        </span>
+      `;
+      card.addEventListener("click", () => {
+        selectedJournalId = note.id;
+        renderJournalView();
+      });
+      elements.journalList.append(card);
+    }
+
+    const note = selectedJournal();
+    if (!note) {
+      elements.journalTitle.value = "";
+      elements.journalBody.value = "";
+      elements.journalEditorHost.innerHTML = "";
+      return;
+    }
+
+    elements.journalTitle.value = note.title;
+    elements.journalBody.value = note.body;
+    mountJournalOverTypeEditor();
+    elements.journalLinks.innerHTML = "";
+    for (const project of noteProjects(note)) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "project-line";
+      row.innerHTML = `<span class="row-title">Projet ${project}</span><span class="row-meta">ouvrir le contexte projet</span>`;
+      row.addEventListener("click", () => {
+        const match = state.projects.find((item) => item.title === project);
+        if (match && !match.archivedAt && match.status !== "archived") {
+          selectedProjectId = match.id;
+          activeView = "project";
+          render();
+        }
+      });
+      elements.journalLinks.append(row);
+    }
+  }
+
+  function renderCalendarView() {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstOfMonth = new Date(year, month, 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7;
+    const gridStart = new Date(year, month, 1 - startOffset);
+
+    elements.calendarMonthLabel.textContent = monthLabel(calendarDate);
+    elements.calendarDays.innerHTML = "";
+
+    for (let index = 0; index < 42; index += 1) {
+      const day = new Date(gridStart);
+      day.setDate(gridStart.getDate() + index);
+      const dateIso = todayISO(day);
+      const items = itemsForDate(dateIso);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = [
+        "calendar-day",
+        day.getMonth() !== month ? "muted" : "",
+        dateIso === todayISO() ? "today" : "",
+        dateIso === selectedCalendarDate ? "active" : "",
+      ].filter(Boolean).join(" ");
+      button.innerHTML = `
+        <span class="calendar-day-number">${day.getDate()}</span>
+        <span class="calendar-badges">
+          ${items.notes.length ? `<span class="calendar-badge note">${items.notes.length} note</span>` : ""}
+          ${items.todos.length ? `<span class="calendar-badge todo">${items.todos.length} todo</span>` : ""}
+        </span>
+      `;
+      button.addEventListener("click", () => {
+        selectedCalendarDate = dateIso;
+        renderCalendarView();
+      });
+      elements.calendarDays.append(button);
+    }
+
+    const selectedItems = itemsForDate(selectedCalendarDate);
+    elements.calendarSelectedLabel.textContent = selectedCalendarDate;
+    elements.calendarDayDetails.innerHTML = "";
+
+    if (!selectedItems.notes.length && !selectedItems.todos.length) {
+      renderEmpty(elements.calendarDayDetails, "Aucune activité pour ce jour.");
+      return;
+    }
+
+    for (const note of selectedItems.notes) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "journal-row";
+      row.innerHTML = `<span class="row-title">${note.title}</span><span class="row-meta">${note.kind}</span>`;
+      row.addEventListener("click", () => {
+        selectedJournalId = note.id;
+        activeView = "journal";
+        render();
+      });
+      elements.calendarDayDetails.append(row);
+    }
+
+    for (const todo of selectedItems.todos) {
+      const row = createTodoRow(todo);
+      row.addEventListener("click", (event) => {
+        if (event.target.closest(".todo-delete")) {
+          deleteTodo(todo.id);
+          return;
+        }
+        if (event.target.closest(".todo-text")) {
+          startInlineEdit(row, todo.id);
+          return;
+        }
+        if (event.target.closest(".box")) {
+          toggleTodo(todo.id);
+        }
+      });
+      elements.calendarDayDetails.append(row);
+    }
+  }
+
+  function openSearchResult(result) {
+    if (result.type === "project") {
+      selectedProjectId = result.id;
+      activeView = "project";
+    } else if (result.type === "journal") {
+      selectedJournalId = result.id;
+      activeView = "journal";
+    } else if (result.type === "todo") {
+      activeView = "todos";
+      todoMode = parseTodo(state.todos.find((todo) => todo.id === result.id)?.raw || "").completed ? "done" : "open";
+      elements.todoViewSearch.value = result.title;
+      document.querySelectorAll("[data-todo-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.todoMode === todoMode);
+      });
+    }
+    elements.searchPanel.classList.add("hidden");
+    elements.searchInput.value = "";
+    render();
+  }
+
+  function renderSearchPanel() {
+    const results = buildSearchResults(elements.searchInput.value);
+    elements.searchPanel.innerHTML = "";
+
+    if (!elements.searchInput.value.trim()) {
+      elements.searchPanel.classList.add("hidden");
+      return;
+    }
+
+    elements.searchPanel.classList.remove("hidden");
+    if (!results.length) {
+      renderEmpty(elements.searchPanel, "Aucun résultat.");
+      return;
+    }
+
+    for (const result of results) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "search-result";
+      row.innerHTML = `
+        <span class="search-kind">${result.type}</span>
+        <span class="search-title">${result.title}</span>
+        <span class="search-excerpt">${result.excerpt}</span>
+      `;
+      row.addEventListener("click", () => openSearchResult(result));
+      elements.searchPanel.append(row);
+    }
+  }
+
+  function renderActiveView() {
+    document.querySelectorAll("[data-view]").forEach((view) => {
+      view.classList.toggle("active", view.dataset.view === activeView);
+    });
+    document.querySelectorAll("[data-view-button]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.viewButton === activeView);
+    });
+  }
+
+  function render() {
+    renderActiveView();
+    renderLayoutState();
+    updateCounts();
+    renderFilters();
+    renderTodos();
+    renderProjects();
+    renderProjectEditor();
+    renderTodoView();
+    renderProjectFocus();
+    renderJournalView();
+    renderCalendarView();
+    renderTriage();
+    renderConfig();
+    renderEditorModes();
+    if (!elements.snapshotPanel.classList.contains("hidden")) renderSnapshots();
+  }
+
+  function addTodo() {
+    const input = elements.captureInput;
+    let raw = input.value.trim();
+    if (!raw) return;
+    raw = ensureTodoCreatedDate(raw);
+    if (state.config.todo.autoId) {
+      raw = ensureTodoId(raw, state.config);
+    }
+    const now = new Date().toISOString();
+    state.todos.unshift({
+      id: parseTodo(raw).id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      raw,
+      createdAt: now,
+      updatedAt: now,
+    });
+    ensureProjectsFromTodoRaw(raw, "todo");
+    input.value = "";
+    persist();
+    render();
+  }
+
+  function updateTodo(todoId, raw) {
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo) return;
+    const withCreated = ensureTodoCreatedDate(raw);
+    todo.raw = state.config.todo.autoId ? ensureTodoId(withCreated, state.config) : withCreated;
+    todo.id = parseTodo(todo.raw).id || todo.id;
+    todo.updatedAt = new Date().toISOString();
+    ensureProjectsFromTodoRaw(todo.raw, "todo");
+    persist();
+    render();
+  }
+
+  function ensureTodoCreatedDate(raw) {
+    let source = raw.trim().replace(/\s+/g, " ");
+    if (!source) return source;
+
+    const parsed = parseTodo(source);
+    if (parsed.createdDate) return source;
+
+    const legacyCreated = source.match(/(?:^|\s)created:(\d{4}-\d{2}-\d{2})(?=\s|$)/);
+    const creationDate = legacyCreated?.[1] || todayISO();
+    source = source.replace(/(^|\s)created:\d{4}-\d{2}-\d{2}(?=\s|$)/, " ").trim().replace(/\s+/g, " ");
+
+    if (source.startsWith("x ")) {
+      const parts = source.split(" ");
+      if (isIsoDate(parts[1])) {
+        return ["x", parts[1], creationDate, ...parts.slice(2)].join(" ");
+      }
+      return ["x", todayISO(), creationDate, ...parts.slice(1)].join(" ");
+    }
+
+    if (/^\([A-Z]\)\s+/.test(source)) {
+      return source.replace(/^(\([A-Z]\)\s+)/, `$1${creationDate} `);
+    }
+
+    return `${creationDate} ${source}`;
+  }
+
+  function deleteTodo(todoId) {
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo) return;
+    if (!confirm(`Supprimer cette todo ?\n\n${todo.raw}`)) return;
+    state.todos = state.todos.filter((item) => item.id !== todoId);
+    persist();
+    render();
+  }
+
+  function toggleTodo(todoId) {
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo) return;
+    const parsed = parseTodo(todo.raw);
+    if (parsed.completed) {
+      todo.raw = todo.raw.replace(/^x\s+\d{4}-\d{2}-\d{2}\s+/, "").replace(/^x\s+/, "");
+    } else {
+      todo.raw = `x ${todayISO()} ${ensureTodoCreatedDate(todo.raw)}`;
+    }
+    todo.updatedAt = new Date().toISOString();
+    persist();
+    render();
+  }
+
+  function reorderTodo(sourceId, targetId) {
+    if (!sourceId || !targetId || sourceId === targetId || state.config.todo.sortMode !== "file") return;
+    const sourceIndex = state.todos.findIndex((todo) => todo.id === sourceId);
+    const targetIndex = state.todos.findIndex((todo) => todo.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+    const [source] = state.todos.splice(sourceIndex, 1);
+    const nextTargetIndex = state.todos.findIndex((todo) => todo.id === targetId);
+    state.todos.splice(nextTargetIndex, 0, source);
+    persist();
+    render();
+  }
+
+  function applyTodoTokenFilter(type, value) {
+    if (!type || !value) return;
+    activeView = "todos";
+    todoMode = "open";
+    document.querySelectorAll("[data-todo-mode]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.todoMode === todoMode);
+    });
+    if (type === "project") {
+      elements.todoViewProjectFilter.value = value;
+      elements.todoViewContextFilter.value = "";
+      elements.todoViewSearch.value = "";
+      activeFilter = `+${value}`;
+    } else if (type === "context") {
+      elements.todoViewContextFilter.value = value;
+      elements.todoViewProjectFilter.value = "";
+      elements.todoViewSearch.value = "";
+      activeFilter = `@${value}`;
+    } else if (["id", "created", "due", "status", "waiting"].includes(type)) {
+      elements.todoViewSearch.value = `${type}:${value}`;
+      activeFilter = type === "id" ? "id:" : activeFilter;
+    } else {
+      elements.todoViewSearch.value = value;
+    }
+    render();
+  }
+
+  function linkTodoToProject(todoId, projectTitle) {
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo) return;
+    todo.raw = addProjectToRaw(todo.raw, projectTitle);
+    todo.updatedAt = new Date().toISOString();
+    persist();
+    render();
+  }
+
+  function startInlineEdit(row, todoId) {
+    const todo = state.todos.find((item) => item.id === todoId);
+    if (!todo) return;
+    const text = row.querySelector(".todo-text");
+    const input = document.createElement("input");
+    input.className = "todo-editor";
+    input.value = todo.raw;
+    row.draggable = false;
+    text.replaceWith(input);
+    input.focus();
+    input.select();
+
+    input.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+    });
+    input.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+    input.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+      if (event.key === "Enter") updateTodo(todoId, input.value);
+      if (event.key === "Escape") render();
+    });
+    input.addEventListener("blur", () => updateTodo(todoId, input.value));
+  }
+
+  function saveSelectedProject() {
+    const project = selectedProject();
+    if (!project) return;
+    project.title = elements.projectTitle.value.trim() || project.title;
+    project.body = elements.projectBody.value;
+    project.updatedAt = new Date().toISOString();
+    syncProjectFromMarkdown(project);
+    persist();
+    renderProjectEditor();
+    renderProjects();
+  }
+
+  function saveProjectBodyOnly() {
+    const project = selectedProject();
+    if (!project) return;
+    project.body = elements.projectBody.value;
+    project.updatedAt = new Date().toISOString();
+    syncProjectFromMarkdown(project);
+    elements.projectPreview.innerHTML = markdownToHtml(project.body);
+    persist();
+    renderProjects();
+  }
+
+  function saveFocusedProjectBodyOnly() {
+    const project = selectedProject();
+    if (!project) return;
+    project.body = elements.projectFocusBody.value;
+    project.updatedAt = new Date().toISOString();
+    syncProjectFromMarkdown(project);
+    elements.projectFocusPreview.innerHTML = markdownToHtml(project.body);
+    persist();
+    renderProjects();
+  }
+
+  function saveFocusedProject() {
+    const project = selectedProject();
+    if (!project) return;
+    project.title = elements.projectFocusTitle.value.trim() || project.title;
+    project.body = elements.projectFocusBody.value;
+    project.updatedAt = new Date().toISOString();
+    syncProjectFromMarkdown(project);
+    elements.projectFocusPreview.innerHTML = markdownToHtml(project.body);
+    persist();
+    renderProjects();
+    renderProjectEditor();
+  }
+
+  function createProject() {
+    const title = prompt("Nom du projet ?");
+    if (!title?.trim()) return;
+    const project = createProjectRecord(title, {
+      summary: "Nouveau projet à compléter.",
+      body: `---\ntype: project\nstatus: active\ntags: []\n---\n\n# Contexte\n\n# Avancement\n\n## ${formatDate(new Date(), state.config.dateInsert)}\n\n- \n\n# Questions ouvertes\n\n# Décisions\n`,
+    });
+    state.projects.unshift(project);
+    selectedProjectId = project.id;
+    activeView = "project";
+    persist();
+    render();
+  }
+
+  function archiveSelectedProject() {
+    const project = selectedProject();
+    if (!project) return;
+    if (!confirm(`Archiver le projet "${project.title}" ?`)) return;
+    project.status = "archived";
+    project.archivedAt = new Date().toISOString();
+    project.updatedAt = project.archivedAt;
+    selectedProjectId = visibleProjects()[0]?.id || null;
+    persist();
+    render();
+  }
+
+  function deleteSelectedProject() {
+    const project = selectedProject();
+    if (!project) return;
+    if (!confirm(`Supprimer definitivement le projet "${project.title}" ?\n\nLes todos et notes lies ne seront pas supprimes.`)) return;
+    state.projects = state.projects.filter((item) => item.id !== project.id);
+    selectedProjectId = visibleProjects()[0]?.id || null;
+    persist();
+    render();
+  }
+
+  function saveRawTodos() {
+    const currentRaw = state.todos.map((todo) => todo.raw).join("\n");
+    if (elements.todoRawEditor.value.trim() === currentRaw.trim()) return;
+    saveSnapshot("Avant edition raw todo.txt", state);
+    const now = new Date().toISOString();
+    state.todos = elements.todoRawEditor.value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((raw, index) => ({
+        raw: state.config.todo.autoId ? ensureTodoId(ensureTodoCreatedDate(raw), state.config) : ensureTodoCreatedDate(raw),
+        createdAt: state.todos[index]?.createdAt || now,
+        updatedAt: now,
+      }))
+      .map((todo, index) => ({
+        ...todo,
+        id: parseTodo(todo.raw).id || state.todos[index]?.id || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${index}`),
+      }));
+    for (const todo of state.todos) ensureProjectsFromTodoRaw(todo.raw, "raw todo.txt");
+    persist();
+    render();
+  }
+
+  function saveJournalNote() {
+    const note = selectedJournal();
+    if (!note) return;
+    note.title = elements.journalTitle.value.trim() || note.title;
+    saveJournalMarkdown(note, journalOverTypeEditor?.getMarkdown() || elements.journalBody.value);
+  }
+
+  function createJournalNote(options = {}) {
+    const now = new Date();
+    const date = todayISO(now);
+    const projectTitle = options.projectTitle || "";
+    const kind = options.kind || "note";
+    const title = options.title || `${date} - ${projectTitle ? `Note ${projectTitle}` : "Nouvelle note"}`;
+    const projects = projectTitle ? [projectTitle] : [];
+    const note = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `journal-${Date.now()}`,
+      title,
+      date,
+      kind,
+      projects,
+      tags: [],
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      body: `---\nkind: ${kind}\nprojects: [${projects.join(", ")}]\ntags: []\ndate: ${date}\n---\n\n# Notes\n\n- `,
+    };
+    state.journal.unshift(note);
+    selectedJournalId = note.id;
+    activeView = "journal";
+    persist();
+    render();
+  }
+
+  function createJournalNoteFromProject() {
+    const project = selectedProject();
+    if (!project) return;
+    createJournalNote({
+      projectTitle: project.title,
+      title: `${todayISO()} - ${project.title}`,
+    });
+  }
+
+  function deleteSelectedJournalNote() {
+    const note = selectedJournal();
+    if (!note) return;
+    if (!confirm(`Supprimer la note "${note.title}" ?`)) return;
+    state.journal = state.journal.filter((item) => item.id !== note.id);
+    selectedJournalId = state.journal[0]?.id || null;
+    persist();
+    render();
+  }
+
+  function createTodoFromJournalSelection() {
+    const note = selectedJournal();
+    if (!note) return;
+    const selected = (journalOverTypeEditor?.getSelection() || elements.journalBody.value
+      .slice(elements.journalBody.selectionStart, elements.journalBody.selectionEnd))
+      .trim()
+      .replace(/^-\s*/, "");
+    if (!selected) return;
+    let raw = selected;
+    for (const project of noteProjects(note)) {
+      if (!raw.includes(`+${project}`)) raw = `${raw} +${project}`;
+    }
+    elements.captureInput.value = raw;
+    addTodo();
+  }
+
+  function addTodoRaw(raw) {
+    if (!raw.trim()) return;
+    const now = new Date().toISOString();
+    const withCreated = ensureTodoCreatedDate(raw);
+    const normalizedRaw = state.config.todo.autoId ? ensureTodoId(withCreated, state.config) : withCreated;
+    state.todos.unshift({
+      id: parseTodo(normalizedRaw).id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      raw: normalizedRaw,
+      createdAt: now,
+      updatedAt: now,
+    });
+    ensureProjectsFromTodoRaw(normalizedRaw, "todo");
+  }
+
+  function extractJournalTasks() {
+    const note = selectedJournal();
+    if (!note) return;
+    const projects = noteProjects(note);
+    const markdown = journalOverTypeEditor?.getMarkdown() || elements.journalBody.value;
+    const taskLines = markdown
+      .split("\n")
+      .map((line) => line.match(/^\s*-\s+\[\s\]\s+(.+)$/)?.[1]?.trim())
+      .filter(Boolean);
+
+    for (const task of taskLines) {
+      let raw = task;
+      for (const project of projects) {
+        if (!raw.includes(`+${project}`)) raw = `${raw} +${project}`;
+      }
+      addTodoRaw(raw);
+    }
+
+    if (taskLines.length) {
+      persist();
+      render();
+    }
+  }
+
+  function appendJournalToProject() {
+    const note = selectedJournal();
+    if (!note) return;
+    const projects = noteProjects(note);
+    const project = state.projects.find((item) => item.title === projects[0]);
+    if (!project) return;
+    const frontmatter = parseFrontmatter(note.body);
+    const entry = `\n# Avancement\n\n## ${formatDate(new Date(note.date || new Date()), state.config.dateInsert)} - ${note.title}\n\n${frontmatter.body.trim()}\n`;
+    project.body = `${project.body.trim()}\n${entry}`;
+    project.updatedAt = new Date().toISOString();
+    selectedProjectId = project.id;
+    activeView = "project";
+    persist();
+    render();
+  }
+
+  function setupResize(handle, options) {
+    let startX = 0;
+    let startWidth = 0;
+
+    handle.addEventListener("pointerdown", (event) => {
+      if (options.isCollapsed()) return;
+      startX = event.clientX;
+      startWidth = state.config.layout[options.widthKey];
+      handle.classList.add("is-dragging");
+      handle.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    handle.addEventListener("pointermove", (event) => {
+      if (!handle.classList.contains("is-dragging")) return;
+      const delta = (event.clientX - startX) * options.direction;
+      const nextWidth = Math.min(options.max, Math.max(options.min, startWidth + delta));
+      state.config.layout[options.widthKey] = nextWidth;
+      renderLayoutState();
+    });
+
+    handle.addEventListener("pointerup", (event) => {
+      if (!handle.classList.contains("is-dragging")) return;
+      handle.classList.remove("is-dragging");
+      handle.releasePointerCapture(event.pointerId);
+      persist();
+    });
+
+    handle.addEventListener("dblclick", () => {
+      options.toggleCollapsed();
+      persist();
+      renderLayoutState();
+    });
+  }
+
+  function setupEvents() {
+    elements.toggleNavButton.addEventListener("click", () => {
+      state.config.layout.navCollapsed = !state.config.layout.navCollapsed;
+      persist();
+      renderLayoutState();
+    });
+    elements.toggleContextButton.addEventListener("click", () => {
+      state.config.layout.contextCollapsed = !state.config.layout.contextCollapsed;
+      persist();
+      renderLayoutState();
+    });
+    setupResize(elements.resizeNavHandle, {
+      widthKey: "navWidth",
+      min: 160,
+      max: 320,
+      direction: 1,
+      isCollapsed: () => state.config.layout.navCollapsed,
+      toggleCollapsed: () => {
+        state.config.layout.navCollapsed = !state.config.layout.navCollapsed;
+      },
+    });
+    setupResize(elements.resizeContextHandle, {
+      widthKey: "contextWidth",
+      min: 240,
+      max: 520,
+      direction: -1,
+      isCollapsed: () => state.config.layout.contextCollapsed,
+      toggleCollapsed: () => {
+        state.config.layout.contextCollapsed = !state.config.layout.contextCollapsed;
+      },
+    });
+    document.querySelectorAll("[data-view-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeView = button.dataset.viewButton;
+        render();
+      });
+    });
+    document.querySelectorAll("[data-todo-mode]").forEach((button) => {
+      button.addEventListener("click", () => {
+        todoMode = button.dataset.todoMode;
+        document.querySelectorAll("[data-todo-mode]").forEach((item) => {
+          item.classList.toggle("active", item === button);
+        });
+        renderTodoView();
+      });
+    });
+    document.querySelectorAll("[data-editor-mode-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const [scope, mode] = button.dataset.editorModeButton.split(":");
+        setEditorMode(scope, mode);
+      });
+    });
+    elements.addTodoButton.addEventListener("click", addTodo);
+    elements.captureInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") addTodo();
+    });
+    elements.insertDateButton.addEventListener("click", () => {
+      elements.captureInput.value = `${elements.captureInput.value} ${formatDate(new Date(), "YYYY-MM-DD")}`.trim();
+      elements.captureInput.focus();
+    });
+    elements.insertProjectDateButton.addEventListener("click", () => {
+      insertAtCursor(elements.projectBody, `\n## ${formatDate(new Date(), state.config.dateInsert)}\n\n- `);
+      saveSelectedProject();
+    });
+    elements.projectBody.addEventListener("input", saveProjectBodyOnly);
+    elements.projectTitle.addEventListener("change", saveSelectedProject);
+    elements.projectFocusBody.addEventListener("input", saveFocusedProjectBodyOnly);
+    elements.projectFocusTitle.addEventListener("change", saveFocusedProject);
+    elements.newProjectButton.addEventListener("click", createProject);
+    elements.projectNewJournalButton.addEventListener("click", createJournalNoteFromProject);
+    elements.archiveProjectButton.addEventListener("click", archiveSelectedProject);
+    elements.deleteProjectButton.addEventListener("click", deleteSelectedProject);
+    elements.newJournalButton.addEventListener("click", createJournalNote);
+    elements.deleteJournalButton.addEventListener("click", deleteSelectedJournalNote);
+    elements.journalKindFilter.addEventListener("change", renderJournalView);
+    elements.journalTitle.addEventListener("change", saveJournalNote);
+    elements.insertJournalDateButton.addEventListener("click", () => {
+      const text = `\n## ${formatDate(new Date(), state.config.dateInsert)}\n\n- `;
+      if (journalOverTypeEditor) {
+        journalOverTypeEditor.insertBlock(text);
+      } else {
+        insertAtCursor(elements.journalBody, text);
+      }
+      saveJournalNote();
+    });
+    elements.journalTodoFromSelectionButton.addEventListener("click", createTodoFromJournalSelection);
+    elements.journalExtractTasksButton.addEventListener("click", extractJournalTasks);
+    elements.journalAppendProjectButton.addEventListener("click", appendJournalToProject);
+    elements.todoViewSearch.addEventListener("input", renderTodoView);
+    elements.todoViewProjectFilter.addEventListener("change", renderTodoView);
+    elements.todoViewContextFilter.addEventListener("change", renderTodoView);
+    elements.todoSortSelect.addEventListener("change", () => {
+      state.config.todo.sortMode = elements.todoSortSelect.value;
+      persist();
+      renderTodoView();
+    });
+    [
+      [elements.todoShowId, "id"],
+      [elements.todoShowCreated, "created"],
+      [elements.todoShowDue, "due"],
+      [elements.todoShowProject, "project"],
+      [elements.todoShowContext, "context"],
+    ].forEach(([checkbox, key]) => {
+      checkbox.addEventListener("change", () => {
+        todoVisibleTokens()[key] = checkbox.checked;
+        persist();
+        render();
+      });
+    });
+    elements.todoRawEditor.addEventListener("change", saveRawTodos);
+    elements.searchInput.addEventListener("input", renderSearchPanel);
+    elements.searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        elements.searchInput.value = "";
+        elements.searchPanel.classList.add("hidden");
+      }
+      if (event.key === "Enter") {
+        const first = buildSearchResults(elements.searchInput.value)[0];
+        if (first) openSearchResult(first);
+      }
+    });
+    elements.calendarPrevButton.addEventListener("click", () => {
+      calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1);
+      renderCalendarView();
+    });
+    elements.calendarTodayButton.addEventListener("click", () => {
+      calendarDate = new Date();
+      selectedCalendarDate = todayISO(calendarDate);
+      renderCalendarView();
+    });
+    elements.calendarNextButton.addEventListener("click", () => {
+      calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1);
+      renderCalendarView();
+    });
+    document.querySelectorAll("[data-insert-template]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const template = button.dataset.insertTemplate;
+        const text = {
+          decision: "\n- Décision : ",
+          question: "\n- Question : ",
+          code: "\n```js\n\n```\n",
+        }[template];
+        insertAtCursor(elements.projectBody, text);
+        saveSelectedProject();
+      });
+    });
+    document.querySelectorAll(".icon-choice").forEach((button) => {
+      button.addEventListener("click", () => {
+        insertAtCursor(elements.projectBody, button.dataset.icon);
+        saveSelectedProject();
+      });
+    });
+    elements.importButton.addEventListener("click", () => elements.importFileInput.click());
+    elements.snapshotsButton.addEventListener("click", () => {
+      renderSnapshots();
+      elements.snapshotPanel.classList.toggle("hidden");
+    });
+    elements.closeSnapshotsButton.addEventListener("click", () => {
+      elements.snapshotPanel.classList.add("hidden");
+    });
+    elements.importFileInput.addEventListener("change", async () => {
+      const file = elements.importFileInput.files?.[0];
+      if (!file) return;
+      try {
+        saveSnapshot(`Avant import ${file.name}`, state);
+        state = normalizeImportedState(JSON.parse(await file.text()));
+        selectedProjectId = state.projects[0]?.id || null;
+        activeFilter = "Tous";
+        await persist();
+        render();
+      } catch (error) {
+        alert(`Import JSON impossible.\n\n${error.message || "Le fichier ne semble pas valide."}`);
+        console.error(error);
+      } finally {
+        elements.importFileInput.value = "";
+      }
+    });
+    elements.exportButton.addEventListener("click", () => exportState(state));
+    elements.autoIdToggle.addEventListener("change", () => {
+      state.config.todo.autoId = elements.autoIdToggle.checked;
+      persist();
+      renderConfig();
+    });
+    elements.dateFormatSelect.addEventListener("change", () => {
+      state.config.dateInsert = elements.dateFormatSelect.value;
+      persist();
+      renderConfig();
+    });
+    elements.staleDaysInput.addEventListener("change", () => {
+      state.config.staleAfterDays = Number(elements.staleDaysInput.value) || 14;
+      persist();
+      render();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key.toLowerCase() === "enter") {
+        addTodo();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        insertAtCursor(elements.projectBody, formatDate(new Date(), state.config.dateInsert));
+        saveSelectedProject();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        elements.searchInput.focus();
+      }
+    });
+  }
+
+  return {
+    start() {
+      setupEvents();
+      normalizeTodoCreationDates();
+      persist();
+      render();
+    },
+  };
+}
+
+// src/main.js
+const app = await createApp();
+app.start();
+    </script>
+  </body>
+</html>
